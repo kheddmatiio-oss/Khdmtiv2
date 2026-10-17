@@ -78,7 +78,7 @@ export function Clients() {
               const s = stats[c.id] ?? { count: 0, total: {} };
               const fiscal = [c.nif && `NIF ${c.nif}`, c.rc && `RC ${c.rc}`].filter(Boolean).join(' · ');
               return (
-                <li key={c.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-0">
+                <li key={c.id} className="row flex items-center gap-3 border-b px-4 py-3 last:border-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-sm font-black"
                     style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
                     {c.name.charAt(0).toUpperCase()}

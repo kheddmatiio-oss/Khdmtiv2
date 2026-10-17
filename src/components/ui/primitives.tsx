@@ -52,8 +52,31 @@ export const Spinner = ({ className }: { className?: string }) => (
 );
 
 /* ── Surfaces ────────────────────────────────────────────── */
-export const Card = ({ className, children, ...rest }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) => (
-  <div {...rest} className={cn('card', className)}>{children}</div>
+export const Card = ({ className, children, hover, ...rest }: {
+  className?: string; children: ReactNode; hover?: boolean;
+} & React.HTMLAttributes<HTMLDivElement>) => (
+  <div {...rest} className={cn('card', hover && 'lift', className)}>{children}</div>
+);
+
+/* ── Loading ─────────────────────────────────────────────── */
+export const Skeleton = ({ className }: { className?: string }) => (
+  <span aria-hidden className={cn('skel block', className)} />
+);
+
+/** Mirrors the shape of a list so the page does not jump when data lands. */
+export const ListSkeleton = ({ rows = 4 }: { rows?: number }) => (
+  <ul>
+    {Array.from({ length: rows }).map((_, i) => (
+      <li key={i} className="flex items-center gap-3 border-b px-4 py-3.5 last:border-0">
+        <Skeleton className="size-10 shrink-0 rounded-full" />
+        <span className="flex-1 space-y-1.5">
+          <Skeleton className="h-3 w-2/5" />
+          <Skeleton className="h-2.5 w-3/5" />
+        </span>
+        <Skeleton className="h-4 w-16 shrink-0" />
+      </li>
+    ))}
+  </ul>
 );
 
 export function Section({ title, action, children, className }: {
@@ -127,12 +150,20 @@ export const Stat = ({ label, value, tone }: { label: ReactNode; value: ReactNod
 );
 
 /* ── Empty state ─────────────────────────────────────────── */
-export function Empty({ icon, title, action }: { icon: ReactNode; title: ReactNode; action?: ReactNode }) {
+export function Empty({ icon, title, hint, action }: {
+  icon: ReactNode; title: ReactNode; hint?: ReactNode; action?: ReactNode;
+}) {
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-      <div className="grid size-14 place-items-center rounded-2xl bg-[var(--surface-2)] text-[var(--text-faint)]">{icon}</div>
-      <p className="text-sm text-muted">{title}</p>
-      {action}
+    <div className="fade-in flex flex-col items-center gap-3 px-6 py-16 text-center">
+      <div className="relative grid size-16 place-items-center rounded-2xl text-[var(--text-faint)]"
+        style={{ background: 'var(--surface-2)' }}>
+        <span aria-hidden className="absolute inset-0 rounded-2xl opacity-40"
+          style={{ background: 'radial-gradient(circle at 50% 0%, var(--accent-soft), transparent 70%)' }} />
+        <span className="relative">{icon}</span>
+      </div>
+      <p className="text-sm font-bold">{title}</p>
+      {hint && <p className="max-w-xs text-xs text-faint">{hint}</p>}
+      {action && <div className="mt-1">{action}</div>}
     </div>
   );
 }

@@ -91,7 +91,7 @@ export function SuperAdmin() {
                 {rows.map((a) => {
                   const d = daysLeft(a), exp = expired(a);
                   return (
-                    <li key={a.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-0">
+                    <li key={a.id} className="row flex items-center gap-3 border-b px-4 py-3 last:border-0">
                       <span className="grid size-10 shrink-0 place-items-center rounded-full text-sm font-black"
                         style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
                         {a.name.charAt(0).toUpperCase()}

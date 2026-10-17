@@ -109,7 +109,7 @@ export function Invoices() {
               const late = inv.status !== 'paid' && isPast(inv.due);
               const client = data.clients.find((c) => c.id === inv.clientId);
               return (
-                <li key={inv.id} className="relative border-b px-4 py-3 last:border-0">
+                <li key={inv.id} className="row relative border-b px-4 py-3 last:border-0">
                   <span aria-hidden className="absolute inset-y-0 start-0 w-[3px]"
                     style={{ background: inv.status === 'draft' ? 'var(--text-faint)' : 'var(--accent)' }} />
                   <div className="flex items-start justify-between gap-3">

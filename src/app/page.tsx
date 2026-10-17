@@ -12,7 +12,7 @@ import { Team } from '@/screens/Team';
 import { SuperAdmin } from '@/screens/SuperAdmin';
 import { Shell, type TabId } from '@/components/Shell';
 import { Logo } from '@/components/Logo';
-import { Card, Button } from '@/components/ui/primitives';
+import { Card, Button, Skeleton, ListSkeleton } from '@/components/ui/primitives';
 import { Clock, Ban } from 'lucide-react';
 
 export default function Page() {
@@ -29,6 +29,7 @@ export default function Page() {
 
   return (
     <Shell tab={tab} setTab={setTab}>
+      <div key={tab} className="fade-in">
       {tab === 'dashboard' && <Dashboard setTab={setTab} />}
       {tab === 'videos' && <Videos />}
       {tab === 'tasks' && <Tasks />}
@@ -36,6 +37,7 @@ export default function Page() {
       {tab === 'clients' && <Clients />}
       {tab === 'team' && <Team />}
       {tab === 'settings' && <SettingsScreen />}
+      </div>
     </Shell>
   );
 }
@@ -57,19 +59,27 @@ function Blocked({ suspended }: { suspended: boolean }) {
   );
 }
 
+/** Mirrors the dashboard's shape so the page does not jump when data lands. */
 function Boot() {
   return (
-    <div className="grid min-h-dvh place-items-center">
-      <div className="flex flex-col items-center gap-4">
-        <Logo size={64} />
-        <div className="flex gap-1.5">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="size-1.5 rounded-full bg-[var(--accent)]"
-              style={{ animation: `pulse 1.2s ${i * 0.15}s ease infinite` }} />
-          ))}
+    <div className="min-h-dvh md:grid md:grid-cols-[16rem_1fr]">
+      <aside className="hidden h-dvh flex-col gap-2 border-e p-3 surface md:flex">
+        <div className="mb-3 flex items-center gap-2.5 px-1 py-2">
+          <Logo size={34} />
+          <span className="flex-1 space-y-1.5">
+            <Skeleton className="h-3 w-24" /><Skeleton className="h-2 w-16" />
+          </span>
         </div>
-      </div>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}`}</style>
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 rounded-xl" />)}
+      </aside>
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
+        <Skeleton className="mb-4 h-7 w-40" />
+        <Skeleton className="mb-4 h-36 rounded-2xl" />
+        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
+        </div>
+        <Card className="overflow-hidden"><ListSkeleton rows={3} /></Card>
+      </main>
     </div>
   );
 }

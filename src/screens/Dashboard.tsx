@@ -42,6 +42,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
       <Empty
         icon={<Film size={24} />}
         title={t('no_clients')}
+        hint={t('solo_hint')}
         action={<Button variant="primary" onClick={() => setTab('clients')}>{t('new_client')}</Button>}
       />
     );
@@ -81,7 +82,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <button onClick={() => setTab('tasks')} className="text-start cursor-pointer">
-          <Card className="p-4 transition-transform hover:-translate-y-0.5">
+          <Card hover className="p-4">
             <p className="mb-2 flex items-center gap-2 text-[0.7rem] font-semibold text-muted">
               <CheckSquare size={14} className="text-[var(--accent)]" />{t('open_tasks')}
             </p>
@@ -89,7 +90,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
           </Card>
         </button>
         <button onClick={() => setTab('invoices')} className="text-start cursor-pointer">
-          <Card className="p-4 transition-transform hover:-translate-y-0.5">
+          <Card hover className="p-4">
             <p className="mb-2 flex items-center gap-2 text-[0.7rem] font-semibold text-muted">
               <Receipt size={14} className="text-[var(--accent)]" />{t('awaiting')}
             </p>
@@ -110,7 +111,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
               {mine.slice(0, 6).map((v) => {
                 const client = data.clients.find((c) => c.id === v.clientId);
                 return (
-                  <li key={v.id} className="relative flex items-center justify-between gap-3 border-b px-4 py-3 last:border-0">
+                  <li key={v.id} className="row relative flex items-center justify-between gap-3 border-b px-4 py-3 last:border-0">
                     <span aria-hidden className="absolute inset-y-0 start-0 w-[3px]"
                       style={{ background: v.paid ? 'var(--accent)' : 'var(--text-faint)' }} />
                     <div className="min-w-0">
@@ -134,15 +135,18 @@ function Metric({ icon, label, value, accent }: {
   icon: React.ReactNode; label: string; value: string; accent?: boolean;
 }) {
   return (
-    <Card className="relative overflow-hidden p-4">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2.5px]"
-        style={{ background: `linear-gradient(90deg, ${accent ? 'var(--accent)' : 'var(--text-faint)'}, transparent)` }} />
-      <span className="mb-3 grid size-8 place-items-center rounded-lg"
-        style={{ background: accent ? 'var(--accent-soft)' : 'var(--surface-2)', color: accent ? 'var(--accent)' : 'var(--text-muted)' }}>
+    <Card hover className="flex items-start gap-3 p-4">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl"
+        style={{
+          background: accent ? 'var(--accent-soft)' : 'var(--surface-2)',
+          color: accent ? 'var(--accent)' : 'var(--text-muted)',
+        }}>
         {icon}
       </span>
-      <p className="text-[0.68rem] font-semibold text-muted">{label}</p>
-      <p className="tnum text-lg font-black leading-tight">{value}</p>
+      <span className="min-w-0">
+        <span className="block text-[0.68rem] font-semibold text-muted">{label}</span>
+        <span className="tnum block truncate text-lg font-black leading-tight">{value}</span>
+      </span>
     </Card>
   );
 }

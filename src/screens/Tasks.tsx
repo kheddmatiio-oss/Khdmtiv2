@@ -93,7 +93,7 @@ export function Tasks() {
               const client = data.clients.find((c) => c.id === k.clientId);
               const assignee = data.editors.find((e) => e.id === k.editorId);
               return (
-                <li key={k.id} className="relative flex items-start gap-3 border-b px-4 py-3 last:border-0">
+                <li key={k.id} className="row relative flex items-start gap-3 border-b px-4 py-3 last:border-0">
                   <span aria-hidden className="absolute inset-y-0 start-0 w-[3px]"
                     style={{ background: k.priority === 'high' && k.status !== 'done' ? 'var(--danger)' : statusTone(k.status), opacity: k.status === 'done' ? .4 : 1 }} />
                   <button onClick={() => cycle(k)} aria-label={t(k.status)}

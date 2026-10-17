@@ -43,10 +43,14 @@ export function Shell({ tab, setTab, children }: {
         onClick={() => { setTab(id); onClick?.(); }}
         aria-current={on ? 'page' : undefined}
         className={cn(
-          'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors cursor-pointer',
+          'relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors cursor-pointer',
           on ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-muted hover:bg-[var(--surface-2)] hover:text-[var(--text)]',
         )}
       >
+        {on && (
+          <span aria-hidden className="absolute inset-y-1.5 start-0 w-[3px] rounded-full"
+            style={{ background: 'var(--accent)' }} />
+        )}
         <Icon size={17} />
         {t(LABEL[id])}
       </button>
@@ -59,10 +63,14 @@ export function Shell({ tab, setTab, children }: {
       <aside className="sticky top-0 hidden h-dvh flex-col gap-1 border-e p-3 surface md:flex">
         <div className="mb-2 flex items-center gap-2.5 px-1 py-2">
           <Logo size={34} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-extrabold leading-tight">{worker?.name ?? agency?.name}</p>
             <p className="truncate text-[0.66rem] text-faint">{worker ? agency?.name : agency?.email}</p>
           </div>
+          {saving && (
+            <span aria-label="saving" className="size-1.5 shrink-0 rounded-full"
+              style={{ background: 'var(--accent)', animation: 'pulse 1.1s ease infinite' }} />
+          )}
         </div>
         {[...PRIMARY, ...secondary].filter(visible).map((id) => <NavItem key={id} id={id} />)}
         <div className="mt-auto flex flex-col gap-1 border-t pt-2">
@@ -109,9 +117,9 @@ export function Shell({ tab, setTab, children }: {
           const Icon = ICON[id]; const on = tab === id;
           return (
             <button key={id} onClick={() => { setTab(id); setMore(false); }}
-              className={cn('flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-[0.58rem] font-extrabold transition-colors cursor-pointer',
-                on ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--text-faint)]')}>
-              <Icon size={18} />{t(LABEL[id])}
+              className={cn('relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-[0.58rem] font-extrabold transition-all duration-200 cursor-pointer',
+                on ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--text-faint)] active:scale-95')}>
+              <Icon size={18} className={cn('transition-transform', on && 'scale-110')} />{t(LABEL[id])}
             </button>
           );
         })}

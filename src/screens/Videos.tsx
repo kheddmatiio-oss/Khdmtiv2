@@ -101,7 +101,7 @@ export function Videos() {
         {list.length === 0 ? <Empty icon={<Film size={22} />} title={t('no_videos')} /> : (
           <ul>
             {list.map((v) => (
-              <li key={v.id} className="relative flex items-center gap-3 border-b px-4 py-3 last:border-0">
+              <li key={v.id} className="row relative flex items-center gap-3 border-b px-4 py-3 last:border-0">
                 <span aria-hidden className="absolute inset-y-0 start-0 w-[3px]"
                   style={{ background: v.paid ? 'var(--accent)' : 'var(--text-faint)' }} />
                 <div className="min-w-0 flex-1">

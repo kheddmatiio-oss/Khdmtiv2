@@ -83,7 +83,7 @@ export function Team() {
             {data.editors.map((e) => {
               const s = stats[e.id] ?? { count: 0, total: {}, owed: {} };
               return (
-                <li key={e.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-0">
+                <li key={e.id} className="row flex items-center gap-3 border-b px-4 py-3 last:border-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-sm font-black text-white"
                     style={{ background: 'linear-gradient(135deg,var(--accent),color-mix(in oklab,var(--accent) 60%,black))' }}>
                     {e.name.charAt(0).toUpperCase()}
