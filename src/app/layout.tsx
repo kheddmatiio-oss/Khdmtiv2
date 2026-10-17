@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" dir="ltr" data-theme="dark" suppressHydrationWarning>
       <body className={`${tajawal.variable} antialiased`}>
         <AppProvider>
           {children}

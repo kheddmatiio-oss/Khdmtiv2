@@ -71,6 +71,17 @@ const ar = {
   show_pw: 'أظهر كلمة السر',
   hide_pw: 'أخفِ كلمة السر',
   menu: 'القائمة',
+  // welcome
+  tagline: 'نظّم خدماتك مع زبائنك بكل سهولة',
+  feat_tasks: 'تتبّع المهام',
+  feat_clients: 'إدارة الزبائن',
+  feat_invoices: 'فواتير احترافية',
+  slide2_title: 'فوتر بسهولة',
+  slide2_sub: 'فواتير A4 بأرقامك الجبائية، جاهزة للطباعة',
+  slide3_title: 'اعرف وين راك',
+  slide3_sub: 'المدفوع والباقي والمتأخر — بكل عملة على حدة',
+  next: 'التالي',
+  skip: 'تخطّى',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -135,6 +146,16 @@ const en: Dict = {
   show_pw: 'Show password',
   hide_pw: 'Hide password',
   menu: 'Menu',
+  tagline: 'Organise your work with your clients, effortlessly',
+  feat_tasks: 'Task tracking',
+  feat_clients: 'Client management',
+  feat_invoices: 'Professional invoices',
+  slide2_title: 'Invoice with ease',
+  slide2_sub: 'A4 invoices carrying your fiscal details, ready to print',
+  slide3_title: 'Know where you stand',
+  slide3_sub: 'Paid, outstanding and overdue — each currency on its own',
+  next: 'Next',
+  skip: 'Skip',
 };
 
 export const DICT = { ar, en } as const;

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useApp } from '@/lib/store';
 import { api, ApiError } from '@/lib/api';
 import { Logo } from '@/components/Logo';
+import { Welcome } from '@/components/Welcome';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
 import type { Key } from '@/lib/i18n';
@@ -23,6 +24,24 @@ export function Auth() {
   const { t, lang, setLang, dark, toggleTheme, signIn } = useApp();
   const [mode, setMode] = useState<Mode>('landing');
 
+  if (mode === 'landing') {
+    return (
+      <>
+        <div className="absolute end-3 top-3 z-10 flex gap-1">
+          <Button size="sm" variant="ghost" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+            className="!text-white/70 hover:!bg-white/10">
+            <Languages size={14} />{lang === 'ar' ? 'EN' : 'ع'}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={toggleTheme} aria-label="theme"
+            className="!text-white/70 hover:!bg-white/10">
+            {dark ? <Sun size={14} /> : <Moon size={14} />}
+          </Button>
+        </div>
+        <Welcome onSignUp={() => setMode('signup')} onSignIn={() => setMode('signin')} />
+      </>
+    );
+  }
+
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
       <div className="absolute end-3 top-3 flex gap-1">
@@ -35,24 +54,7 @@ export function Auth() {
       </div>
 
       <div className="w-full max-w-[22rem] fade-in">
-        {mode === 'landing'
-          ? <Landing onPick={setMode} />
-          : <AuthForm mode={mode} onBack={() => setMode('landing')} onDone={signIn} />}
-      </div>
-    </div>
-  );
-}
-
-function Landing({ onPick }: { onPick: (m: Mode) => void }) {
-  const { t } = useApp();
-  return (
-    <div className="flex flex-col items-center text-center">
-      <Logo size={64} />
-      <h1 className="mt-4 text-[1.9rem] font-black leading-tight tracking-tight">{t('app')}</h1>
-      <p className="mb-7 mt-2 text-sm leading-relaxed text-muted">{t('solo_hint')}</p>
-      <div className="flex w-full flex-col gap-2.5">
-        <Button variant="primary" size="lg" onClick={() => onPick('signup')}>{t('start_free')}</Button>
-        <Button size="lg" onClick={() => onPick('signin')}>{t('have_account')}</Button>
+        <AuthForm mode={mode} onBack={() => setMode('landing')} onDone={signIn} />
       </div>
     </div>
   );

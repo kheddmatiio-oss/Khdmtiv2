@@ -34,7 +34,7 @@ export const useApp = () => {
 const LS = { lang: 'khedmti.lang', theme: 'khedmti.theme', session: 'khedmti.session' };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>('ar');
+  const [lang, setLangState] = useState<Lang>('en');
   const [dark, setDark] = useState(true);
   const [phase, setPhase] = useState<Phase>('booting');
   const [agency, setAgency] = useState<Agency | null>(null);
@@ -53,7 +53,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /* preferences + session restore */
   useEffect(() => {
-    const l = (localStorage.getItem(LS.lang) as Lang) || 'ar';
+    // English is what a first-time visitor sees; a saved choice still wins
+    const l = (localStorage.getItem(LS.lang) as Lang) || 'en';
     const d = localStorage.getItem(LS.theme) !== 'light';
     setLangState(l); setDark(d);
 
