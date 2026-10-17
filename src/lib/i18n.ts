@@ -1,0 +1,124 @@
+export type Lang = 'ar' | 'en';
+
+const ar = {
+  app: 'خدمتي', beta: 'بيتا',
+  // nav
+  dashboard: 'لوحة التحكم', videos: 'الفيديوهات', tasks: 'المهام',
+  invoices: 'الفواتير', clients: 'الزبائن', team: 'الفريق', settings: 'الإعدادات',
+  logout: 'خروج', more: 'المزيد',
+  // auth
+  signin: 'تسجيل الدخول', signup: 'إنشاء حساب', email: 'البريد الإلكتروني',
+  password: 'كلمة السر', admin: 'أدمين', worker: 'عضو الفريق',
+  workspace: 'اسم المساحة', your_name: 'اسمك', phone: 'رقم الهاتف',
+  start_free: 'ابدأ مجاناً', have_account: 'عندي حساب',
+  acc_type: 'نوع الحساب', solo: 'إيديتور مستقل',
+  solo_hint: 'حساب شخصي — نظّم خدمتك مع زباينك',
+  admin_hint: 'عندك فريق إيديتورز',
+  workspace_email: 'إيميل المساحة', pw_hint: '4 حروف على الأقل', back: 'رجع',
+  // actions
+  add: 'زيد', save: 'حفظ', edit: 'تعديل', delete: 'حذف', cancel: 'إلغاء',
+  search: 'بحث', all: 'الكل', confirm_delete: 'متأكد من الحذف؟',
+  // money
+  total: 'المجموع', paid: 'مدفوع', unpaid: 'ما خلصش', outstanding: 'الباقي',
+  this_month: 'هذا الشهر', price: 'السعر', currency: 'العملة', amount: 'المبلغ',
+  // videos
+  new_video: 'سجّل فيديو', video_title: 'عنوان الفيديو', date: 'التاريخ',
+  no_videos: 'ما كاين حتى فيديو', video_count: 'عدد الفيديوهات',
+  // clients
+  new_client: 'زبون جديد', no_clients: 'ما كاين حتى زبون',
+  client_name: 'اسم الزبون', address: 'العنوان',
+  // tasks
+  new_task: 'مهمة جديدة', task_title: 'عنوان المهمة', no_tasks: 'ما كاين حتى مهمة',
+  todo: 'مطلوبة', doing: 'قيد الخدمة', done: 'خلاصت',
+  priority: 'الأولوية', normal: 'عادية', urgent: 'مستعجلة',
+  due: 'الأجل', overdue: 'متأخرة', today: 'اليوم', assigned_to: 'مكلّف',
+  unassigned: 'بلا تكليف', open_tasks: 'مهام مفتوحة',
+  // invoices
+  new_invoice: 'فاتورة جديدة', invoice: 'فاتورة', invoice_no: 'رقم الفاتورة',
+  issue_date: 'تاريخ الإصدار', due_date: 'أجل الدفع', period: 'الفترة',
+  draft: 'مسودة', sent: 'مرسلة', items: 'البنود', qty: 'الكمية',
+  unit_price: 'سعر الوحدة', designation: 'البيان', ref: 'رقم',
+  subtotal_ht: 'المجموع خارج الرسم', vat: 'TVA', total_ttc: 'الإجمالي بالرسم',
+  discount: 'تخفيض', no_invoices: 'ما كاين حتى فاتورة',
+  billed_to: 'الفاتورة لـ', issued_by: 'من طرف', print: 'طبع / PDF',
+  awaiting: 'في انتظار الدفع', total_invoiced: 'مجموع الفواتير',
+  add_line: 'زيد سطر', from_videos: 'من الفيديوهات', custom_line: 'سطر حر',
+  object: 'الموضوع', payment_mode: 'طريقة الدفع', no_unbilled: 'كل الفيديوهات تفوترت',
+  // settings
+  sec_company: 'معلوماتي', sec_invoice: 'الفوترة', sec_currency: 'العملات',
+  sec_appearance: 'المظهر', company_name: 'اسم النشاط', logo: 'الشعار',
+  upload_logo: 'حمّل الشعار', remove: 'حيّد', vat_rate: 'نسبة TVA (%)',
+  invoice_lang: 'لغة الفاتورة', invoice_lang_hint: 'مستقلة على لغة المنصة — الزبون والمحاسب غالباً يقراو فرنسية',
+  base_currency: 'العملة الأساسية', rate_to: 'الصرف مقابل {0}',
+  add_currency: 'زيد عملة', accent_color: 'لون المنصة', theme_default: 'الأصلي',
+  fiscal_hint: 'تظهر في فواتيرك — خلّي فارغ اللي ما تستعملوش',
+  // errors / toasts
+  err_email: 'البريد الإلكتروني غير صحيح', err_pw: 'كلمة السر قصيرة',
+  err_name: 'دخّل الاسم', err_wrong: 'بيانات غير صحيحة',
+  err_dup: 'هذا البريد مسجّل من قبل', err_net: 'تعذّر الاتصال بالسيرفر',
+  err_session: 'انتهت الجلسة — عاود دخول', err_items: 'زيد على الأقل سطر واحد',
+  saved: 'تم الحفظ', deleted: 'تم الحذف', loading: 'جاري التحميل',
+} as const;
+
+type Dict = Record<keyof typeof ar, string>;
+
+const en: Dict = {
+  app: 'Khedmti', beta: 'Beta',
+  dashboard: 'Dashboard', videos: 'Videos', tasks: 'Tasks',
+  invoices: 'Invoices', clients: 'Clients', team: 'Team', settings: 'Settings',
+  logout: 'Log out', more: 'More',
+  signin: 'Sign in', signup: 'Create account', email: 'Email',
+  password: 'Password', admin: 'Admin', worker: 'Team member',
+  workspace: 'Workspace name', your_name: 'Your name', phone: 'Phone',
+  start_free: 'Start free', have_account: 'I have an account',
+  acc_type: 'Account type', solo: 'Freelance editor',
+  solo_hint: 'Personal — track your work with your clients',
+  admin_hint: 'You manage a team of editors',
+  workspace_email: 'Workspace email', pw_hint: 'At least 4 characters', back: 'Back',
+  add: 'Add', save: 'Save', edit: 'Edit', delete: 'Delete', cancel: 'Cancel',
+  search: 'Search', all: 'All', confirm_delete: 'Delete this?',
+  total: 'Total', paid: 'Paid', unpaid: 'Unpaid', outstanding: 'Outstanding',
+  this_month: 'This month', price: 'Price', currency: 'Currency', amount: 'Amount',
+  new_video: 'Log a video', video_title: 'Video title', date: 'Date',
+  no_videos: 'No videos yet', video_count: 'Videos',
+  new_client: 'New client', no_clients: 'No clients yet',
+  client_name: 'Client name', address: 'Address',
+  new_task: 'New task', task_title: 'Task title', no_tasks: 'No tasks',
+  todo: 'To do', doing: 'In progress', done: 'Done',
+  priority: 'Priority', normal: 'Normal', urgent: 'Urgent',
+  due: 'Due', overdue: 'Overdue', today: 'Today', assigned_to: 'Assigned to',
+  unassigned: 'Unassigned', open_tasks: 'Open tasks',
+  new_invoice: 'New invoice', invoice: 'Invoice', invoice_no: 'Invoice no.',
+  issue_date: 'Issue date', due_date: 'Due date', period: 'Period',
+  draft: 'Draft', sent: 'Sent', items: 'Items', qty: 'Qty',
+  unit_price: 'Unit price', designation: 'Description', ref: 'Ref',
+  subtotal_ht: 'Subtotal excl. VAT', vat: 'VAT', total_ttc: 'Total incl. VAT',
+  discount: 'Discount', no_invoices: 'No invoices yet',
+  billed_to: 'Billed to', issued_by: 'Issued by', print: 'Print / PDF',
+  awaiting: 'Awaiting payment', total_invoiced: 'Total invoiced',
+  add_line: 'Add line', from_videos: 'From videos', custom_line: 'Custom line',
+  object: 'Subject', payment_mode: 'Payment method', no_unbilled: 'All videos are invoiced',
+  sec_company: 'My details', sec_invoice: 'Invoicing', sec_currency: 'Currencies',
+  sec_appearance: 'Appearance', company_name: 'Business name', logo: 'Logo',
+  upload_logo: 'Upload logo', remove: 'Remove', vat_rate: 'VAT rate (%)',
+  invoice_lang: 'Invoice language', invoice_lang_hint: 'Separate from the app language — clients and accountants usually read French',
+  base_currency: 'Main currency', rate_to: 'Rate to {0}',
+  add_currency: 'Add currency', accent_color: 'Accent colour', theme_default: 'Default',
+  fiscal_hint: 'Shown on your invoices — leave blank what you do not use',
+  err_email: 'Invalid email', err_pw: 'Password too short',
+  err_name: 'Enter a name', err_wrong: 'Wrong credentials',
+  err_dup: 'Email already registered', err_net: 'Could not reach the server',
+  err_session: 'Session expired — sign in again', err_items: 'Add at least one line',
+  saved: 'Saved', deleted: 'Deleted', loading: 'Loading',
+};
+
+export const DICT = { ar, en } as const;
+export type Key = keyof typeof ar;
+
+export const translate = (lang: Lang, key: Key, ...args: (string | number)[]) => {
+  let s: string = DICT[lang][key] ?? DICT.ar[key] ?? key;
+  args.forEach((a, i) => { s = s.replace(`{${i}}`, String(a)); });
+  return s;
+};
+
+export const DIR: Record<Lang, 'rtl' | 'ltr'> = { ar: 'rtl', en: 'ltr' };

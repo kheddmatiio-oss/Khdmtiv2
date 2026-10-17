@@ -1,26 +1,113 @@
 @import "tailwindcss";
 
+/* ── Khedmti design tokens ─────────────────────────────────
+   Charte graphique: Primary Blue #0D7CFB · Electric #1652A2
+   · Deep Navy #0B111A · Charcoal #1A1D22 · Soft Gray #F4F7FB
+   Blue carries paid/done/active. Neutral gray carries pending
+   and draft. Red is alerts only — never decoration.          */
+@theme {
+  --font-sans: var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50:  #EAF3FF;
+  --color-brand-100: #D4E7FF;
+  --color-brand-200: #A9CEFF;
+  --color-brand-300: #6FACFD;
+  --color-brand-400: #3A8FFC;
+  --color-brand-500: #0D7CFB;
+  --color-brand-600: #0B63CC;
+  --color-brand-700: #1652A2;
+  --color-brand-800: #123F7D;
+  --color-brand-900: #0E2E59;
+
+  --color-ink-50:  #F4F7FB;
+  --color-ink-100: #E7ECF4;
+  --color-ink-200: #D2DAE8;
+  --color-ink-300: #A8B4C8;
+  --color-ink-400: #7A869C;
+  --color-ink-500: #5A6473;
+  --color-ink-600: #3A414E;
+  --color-ink-700: #272D38;
+  --color-ink-800: #1A1D22;
+  --color-ink-900: #0B111A;
+  --color-ink-950: #060A10;
+
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+}
+
+/* Semantic surface tokens — components only ever reference these,
+   so a theme switch never needs a component edit. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: var(--color-ink-50);
+  --surface: #ffffff;
+  --surface-2: var(--color-ink-50);
+  --border: var(--color-ink-200);
+  --text: var(--color-ink-900);
+  --text-muted: var(--color-ink-500);
+  --text-faint: var(--color-ink-400);
+  --accent: var(--color-brand-500);
+  --accent-soft: color-mix(in oklab, var(--accent) 10%, transparent);
+  --accent-border: color-mix(in oklab, var(--accent) 28%, transparent);
+  --danger: #D32F2F;
+  --danger-soft: color-mix(in oklab, #D32F2F 10%, transparent);
+  --warn: #96690F;
+  --shadow-sm: 0 1px 2px rgb(11 17 26 / .06), 0 1px 3px rgb(11 17 26 / .04);
+  --shadow-md: 0 4px 16px rgb(11 17 26 / .08);
+  --shadow-lg: 0 16px 48px rgb(11 17 26 / .12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html[data-theme="dark"] {
+  --bg: var(--color-ink-900);
+  --surface: var(--color-ink-800);
+  --surface-2: var(--color-ink-700);
+  --border: #2B303A;
+  --text: var(--color-ink-50);
+  --text-muted: #8B93A3;
+  --text-faint: #565E6D;
+  --accent-soft: color-mix(in oklab, var(--accent) 16%, transparent);
+  --accent-border: color-mix(in oklab, var(--accent) 34%, transparent);
+  --danger: #E5484D;
+  --danger-soft: color-mix(in oklab, #E5484D 14%, transparent);
+  --warn: #C8912F;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / .45);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / .55);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * { border-color: var(--border); }
+  html { color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* digits line up in every table and total */
+  .tnum { font-variant-numeric: tabular-nums; }
+  ::selection { background: var(--accent-soft); }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .surface { background: var(--surface); }
+  .surface-2 { background: var(--surface-2); }
+  .text-muted { color: var(--text-muted); }
+  .text-faint { color: var(--text-faint); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
 }
