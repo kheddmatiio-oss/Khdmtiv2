@@ -17,7 +17,7 @@ const VARIANT: Record<Variant, string> = {
     'text-[var(--danger)] bg-[var(--danger-soft)] hover:brightness-105',
 };
 const SIZE: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5 rounded-lg',
+  sm: 'h-8 px-3 text-xs gap-1.5 rounded-lg relative after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[\'\']',
   md: 'h-10 px-4 text-sm gap-2 rounded-xl',
   lg: 'h-12 px-5 text-[0.95rem] gap-2 rounded-xl',
 };
@@ -150,9 +150,17 @@ export const Stat = ({ label, value, tone }: { label: ReactNode; value: ReactNod
 );
 
 /* ── Empty state ─────────────────────────────────────────── */
-export function Empty({ icon, title, hint, action }: {
-  icon: ReactNode; title: ReactNode; hint?: ReactNode; action?: ReactNode;
+export function Empty({ icon, title, hint, action, compact }: {
+  icon: ReactNode; title: ReactNode; hint?: ReactNode; action?: ReactNode; compact?: boolean;
 }) {
+  // Inside a panel an empty state must not balloon the card it sits in.
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2.5 px-4 py-5 text-xs text-faint">
+        <span className="shrink-0">{icon}</span>{title}
+      </div>
+    );
+  }
   return (
     <div className="fade-in flex flex-col items-center gap-3 px-6 py-16 text-center">
       <div className="relative grid size-16 place-items-center rounded-2xl text-[var(--text-faint)]"

@@ -58,6 +58,19 @@ const ar = {
   err_dup: 'هذا البريد مسجّل من قبل', err_net: 'تعذّر الاتصال بالسيرفر',
   err_session: 'انتهت الجلسة — عاود دخول', err_items: 'زيد على الأقل سطر واحد',
   saved: 'تم الحفظ', deleted: 'تم الحذف', loading: 'جاري التحميل',
+  // auth detail
+  pw_rule_len: '4 حروف على الأقل',
+  phone_hint: 'مثال: 0555 12 34 56',
+  email_hint: 'نستعملوه للدخول',
+  welcome_back: 'مرحبا بك مرة أخرى',
+  create_workspace: 'أنشئ مساحتك',
+  signing_in: 'جاري الدخول…',
+  creating: 'جاري الإنشاء…',
+  welcome_done: 'مرحبا بك!',
+  required: 'هذا الحقل مطلوب',
+  show_pw: 'أظهر كلمة السر',
+  hide_pw: 'أخفِ كلمة السر',
+  menu: 'القائمة',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -110,6 +123,18 @@ const en: Dict = {
   err_dup: 'Email already registered', err_net: 'Could not reach the server',
   err_session: 'Session expired — sign in again', err_items: 'Add at least one line',
   saved: 'Saved', deleted: 'Deleted', loading: 'Loading',
+  pw_rule_len: 'At least 4 characters',
+  phone_hint: 'e.g. 0555 12 34 56',
+  email_hint: 'Used to sign in',
+  welcome_back: 'Welcome back',
+  create_workspace: 'Create your workspace',
+  signing_in: 'Signing in…',
+  creating: 'Creating…',
+  welcome_done: 'Welcome!',
+  required: 'This field is required',
+  show_pw: 'Show password',
+  hide_pw: 'Hide password',
+  menu: 'Menu',
 };
 
 export const DICT = { ar, en } as const;

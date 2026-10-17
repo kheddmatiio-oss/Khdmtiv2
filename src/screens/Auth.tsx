@@ -5,8 +5,11 @@ import { api, ApiError } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
-import { Building2, User, Mail, Lock, Phone, ArrowLeft, Languages, Sun, Moon } from 'lucide-react';
 import type { Key } from '@/lib/i18n';
+import {
+  Building2, User, Mail, Lock, Phone, ArrowLeft, Languages, Sun, Moon,
+  Eye, EyeOff, Check,
+} from 'lucide-react';
 
 type Mode = 'landing' | 'signin' | 'signup';
 
@@ -21,13 +24,8 @@ export function Auth() {
   const [mode, setMode] = useState<Mode>('landing');
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 py-10">
-      <div aria-hidden className="pointer-events-none absolute -end-40 -top-40 size-[34rem] rounded-full"
-        style={{ background: 'radial-gradient(circle, var(--accent-soft), transparent 65%)' }} />
-      <div aria-hidden className="pointer-events-none absolute -bottom-40 -start-32 size-[26rem] rounded-full"
-        style={{ background: 'radial-gradient(circle, var(--accent-soft), transparent 68%)' }} />
-
-      <div className="absolute end-4 top-4 flex gap-1">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
+      <div className="absolute end-3 top-3 flex gap-1">
         <Button size="sm" variant="ghost" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}>
           <Languages size={14} />{lang === 'ar' ? 'EN' : 'ع'}
         </Button>
@@ -36,7 +34,7 @@ export function Auth() {
         </Button>
       </div>
 
-      <div className="relative w-full max-w-sm">
+      <div className="w-full max-w-[22rem] fade-in">
         {mode === 'landing'
           ? <Landing onPick={setMode} />
           : <AuthForm mode={mode} onBack={() => setMode('landing')} onDone={signIn} />}
@@ -49,10 +47,9 @@ function Landing({ onPick }: { onPick: (m: Mode) => void }) {
   const { t } = useApp();
   return (
     <div className="flex flex-col items-center text-center">
-      <Logo size={76} />
-      <h1 className="mt-5 text-[2.1rem] font-black leading-tight tracking-tight">{t('app')}</h1>
-      <div className="my-3 h-1 w-14 rounded-full" style={{ background: 'linear-gradient(90deg,var(--accent),transparent)' }} />
-      <p className="mb-7 text-sm leading-relaxed text-muted">{t('solo_hint')}</p>
+      <Logo size={64} />
+      <h1 className="mt-4 text-[1.9rem] font-black leading-tight tracking-tight">{t('app')}</h1>
+      <p className="mb-7 mt-2 text-sm leading-relaxed text-muted">{t('solo_hint')}</p>
       <div className="flex w-full flex-col gap-2.5">
         <Button variant="primary" size="lg" onClick={() => onPick('signup')}>{t('start_free')}</Button>
         <Button size="lg" onClick={() => onPick('signin')}>{t('have_account')}</Button>
@@ -66,47 +63,70 @@ function AuthForm({ mode, onBack, onDone }: {
   onDone: ReturnType<typeof useApp>['signIn'];
 }) {
   const { t } = useApp();
+  const signup = mode === 'signup';
   const [who, setWho] = useState<'admin' | 'worker'>('admin');
   const [type, setType] = useState<'solo' | 'agency'>('solo');
   const [f, setF] = useState({ name: '', email: '', phone: '', pw: '' });
-  const [err, setErr] = useState<Key | null>(null);
-  const [busy, setBusy] = useState(false);
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [formError, setFormError] = useState<Key | null>(null);
+  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
+  const [reveal, setReveal] = useState(false);
+
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setF({ ...f, [k]: e.target.value });
+    setFormError(null);
+  };
+  const blur = (k: string) => () => setTouched((p) => ({ ...p, [k]: true }));
+
+  // validated per field so the message sits next to what is wrong
+  const errors = {
+    name: signup && !f.name.trim() ? t('required') : '',
+    email: !f.email.trim() ? t('required') : !f.email.includes('@') ? t('err_email') : '',
+    pw: !f.pw ? t('required') : f.pw.length < 4 ? t('err_pw') : '',
+  };
+  const show = (k: keyof typeof errors) => (touched[k] ? errors[k] : '');
+  const valid = !errors.email && !errors.pw && (!signup || !errors.name);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(null);
-    if (mode === 'signup' && !f.name.trim()) return setErr('err_name');
-    if (!f.email.includes('@')) return setErr('err_email');
-    if (f.pw.length < 4) return setErr('err_pw');
-    setBusy(true);
+    setTouched({ name: true, email: true, pw: true });
+    if (!valid) return;
+    setState('busy'); setFormError(null);
     try {
-      if (mode === 'signup') {
-        onDone(await api.register(f.name.trim(), f.email.trim().toLowerCase(), f.pw, f.phone.trim(), type));
-      } else if (who === 'worker') {
-        const r = await api.loginWorker(f.email.trim().toLowerCase(), f.pw);
-        onDone(r.agency, r.worker, r.data);
-      } else {
-        onDone(await api.login(f.email.trim().toLowerCase(), f.pw));
-      }
+      const email = f.email.trim().toLowerCase();
+      let result;
+      if (signup) result = { agency: await api.register(f.name.trim(), email, f.pw, f.phone.trim(), type) };
+      else if (who === 'worker') {
+        const r = await api.loginWorker(email, f.pw);
+        result = { agency: r.agency, worker: r.worker, data: r.data };
+      } else result = { agency: await api.login(email, f.pw) };
+
+      setState('done');
+      // a beat of confirmation before the app replaces the screen
+      setTimeout(() => onDone(result.agency, result.worker, result.data), 450);
     } catch (e2) {
-      setErr(CODE_TO_KEY[e2 instanceof ApiError ? e2.code : 'network'] ?? 'err_net');
-      setBusy(false);
+      setFormError(CODE_TO_KEY[e2 instanceof ApiError ? e2.code : 'network'] ?? 'err_net');
+      setState('idle');
     }
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-5 sm:p-6">
       <div className="mb-5 flex items-center gap-3">
-        <Logo size={34} />
-        <h2 className="text-lg font-black">{mode === 'signup' ? t('signup') : t('signin')}</h2>
+        <Logo size={32} />
+        <div className="min-w-0">
+          <h2 className="text-base font-black leading-tight">
+            {signup ? t('create_workspace') : t('welcome_back')}
+          </h2>
+          <p className="text-[0.68rem] text-faint">{signup ? t('signup') : t('signin')}</p>
+        </div>
       </div>
 
-      {mode === 'signin' && (
-        <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-[var(--surface-2)] p-1">
+      {!signup && (
+        <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-[var(--surface-2)] p-1" role="tablist">
           {(['admin', 'worker'] as const).map((v) => (
-            <button key={v} type="button" onClick={() => setWho(v)}
-              className={cn('flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition-colors cursor-pointer',
+            <button key={v} type="button" role="tab" aria-selected={who === v} onClick={() => setWho(v)}
+              className={cn('flex min-h-11 items-center justify-center gap-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer',
                 who === v ? 'surface text-[var(--accent)] shadow-[var(--shadow-sm)]' : 'text-muted')}>
               {v === 'admin' ? <Building2 size={13} /> : <User size={13} />}{t(v === 'admin' ? 'admin' : 'worker')}
             </button>
@@ -114,51 +134,73 @@ function AuthForm({ mode, onBack, onDone }: {
         </div>
       )}
 
-      <form onSubmit={submit} className="flex flex-col gap-3.5">
-        {mode === 'signup' && (
+      <form onSubmit={submit} noValidate className="flex flex-col gap-3.5">
+        {signup && (
           <>
             <Field label={t('acc_type')}>
-              <Select value={type} onChange={(e) => setType(e.target.value as 'solo' | 'agency')}>
-                <option value="solo">{t('solo')} — {t('solo_hint')}</option>
-                <option value="agency">{t('admin')} — {t('admin_hint')}</option>
+              <Select value={type} onChange={(e) => setType(e.target.value as 'solo' | 'agency')} className="min-h-11">
+                <option value="solo">{t('solo')}</option>
+                <option value="agency">{t('admin')}</option>
               </Select>
             </Field>
-            <Field label={type === 'solo' ? t('your_name') : t('workspace')}>
-              <Input value={f.name} onChange={set('name')} autoFocus />
+            <Field label={type === 'solo' ? t('your_name') : t('workspace')} error={show('name') || undefined}>
+              <Input value={f.name} onChange={set('name')} onBlur={blur('name')}
+                aria-invalid={!!show('name')} autoComplete="name" className="min-h-11" autoFocus />
             </Field>
           </>
         )}
 
-        <Field label={who === 'worker' && mode === 'signin' ? t('workspace_email') : t('email')}>
+        <Field
+          label={who === 'worker' && !signup ? t('workspace_email') : t('email')}
+          hint={signup ? t('email_hint') : undefined}
+          error={show('email') || undefined}
+        >
           <div className="relative">
             <Mail size={14} className="pointer-events-none absolute inset-y-0 my-auto start-3 text-[var(--text-faint)]" />
-            <Input type="email" inputMode="email" autoComplete="email" className="ps-9"
-              value={f.email} onChange={set('email')} placeholder="you@email.com" />
+            <Input type="email" inputMode="email" autoComplete="email" dir="ltr"
+              className="min-h-11 ps-9 text-start" placeholder="you@email.com"
+              aria-invalid={!!show('email')} value={f.email} onChange={set('email')} onBlur={blur('email')} />
           </div>
         </Field>
 
-        {mode === 'signup' && (
-          <Field label={t('phone')}>
+        {signup && (
+          <Field label={t('phone')} hint={t('phone_hint')}>
             <div className="relative">
               <Phone size={14} className="pointer-events-none absolute inset-y-0 my-auto start-3 text-[var(--text-faint)]" />
-              <Input className="ps-9" value={f.phone} onChange={set('phone')} placeholder="0555 12 34 56" />
+              <Input className="min-h-11 ps-9 text-start" dir="ltr" inputMode="tel" autoComplete="tel"
+                placeholder="0555 12 34 56" value={f.phone} onChange={set('phone')} />
             </div>
           </Field>
         )}
 
-        <Field label={t('password')} hint={mode === 'signup' ? t('pw_hint') : undefined}
-          error={err ? t(err) : undefined}>
+        <Field label={t('password')} hint={signup ? t('pw_rule_len') : undefined} error={show('pw') || undefined}>
           <div className="relative">
             <Lock size={14} className="pointer-events-none absolute inset-y-0 my-auto start-3 text-[var(--text-faint)]" />
-            <Input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              className="ps-9" value={f.pw} onChange={set('pw')} />
+            <Input type={reveal ? 'text' : 'password'} autoComplete={signup ? 'new-password' : 'current-password'}
+              className="min-h-11 px-10" aria-invalid={!!show('pw')}
+              value={f.pw} onChange={set('pw')} onBlur={blur('pw')} />
+            <button type="button" onClick={() => setReveal((v) => !v)}
+              aria-label={reveal ? t('hide_pw') : t('show_pw')}
+              className="absolute inset-y-0 end-1 my-auto grid size-9 place-items-center rounded-lg text-[var(--text-faint)] hover:text-[var(--text)] cursor-pointer">
+              {reveal ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
           </div>
         </Field>
 
-        <Button type="submit" variant="primary" size="lg" loading={busy} className="mt-1">
-          {mode === 'signup' ? t('start_free') : t('signin')}
+        {formError && (
+          <p role="alert" className="rounded-lg px-3 py-2 text-xs font-bold"
+            style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>
+            {t(formError)}
+          </p>
+        )}
+
+        <Button type="submit" variant="primary" size="lg" loading={state === 'busy'}
+          disabled={state === 'done'} className="mt-1 min-h-12">
+          {state === 'done' ? <><Check size={16} />{t('welcome_done')}</>
+            : state === 'busy' ? (signup ? t('creating') : t('signing_in'))
+            : (signup ? t('start_free') : t('signin'))}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onBack}>
+        <Button type="button" variant="ghost" size="sm" onClick={onBack} className="min-h-10">
           <ArrowLeft size={13} className="rtl:rotate-180" />{t('back')}
         </Button>
       </form>

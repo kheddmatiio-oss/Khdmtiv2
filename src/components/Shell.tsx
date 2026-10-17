@@ -7,7 +7,7 @@ import { Button } from './ui/primitives';
 import type { Key } from '@/lib/i18n';
 import {
   LayoutGrid, Film, CheckSquare, Receipt, Briefcase, Users, Settings as Cog,
-  MoreHorizontal, LogOut, Sun, Moon, Languages, X,
+  MoreHorizontal, LogOut, Sun, Moon, Languages, X, Menu,
 } from 'lucide-react';
 
 export type TabId = 'dashboard' | 'videos' | 'tasks' | 'invoices' | 'clients' | 'team' | 'settings';
@@ -96,11 +96,8 @@ export function Shell({ tab, setTab, children }: {
           </div>
           <div className="flex items-center gap-1">
             {saving && <span className="text-[0.6rem] text-faint">…</span>}
-            <Button size="sm" variant="ghost" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label="language">
-              {lang === 'ar' ? 'EN' : 'ع'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={toggleTheme} aria-label="theme">
-              {dark ? <Sun size={15} /> : <Moon size={15} />}
+            <Button size="sm" variant="ghost" onClick={() => setMore(true)} aria-label={t('menu')}>
+              <Menu size={17} />
             </Button>
           </div>
         </header>
@@ -110,6 +107,52 @@ export function Shell({ tab, setTab, children }: {
         </main>
       </div>
 
+      {/* mobile drawer — the full nav, not a stub */}
+      {more && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label={t('menu')}>
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={() => setMore(false)}
+            style={{ animation: 'fade .18s ease' }} />
+          <div className="absolute inset-y-0 end-0 flex w-[17rem] max-w-[82vw] flex-col gap-1 border-s p-3 surface"
+            style={{ animation: 'drawer .26s cubic-bezier(.32,.72,0,1)' }}>
+            <div className="mb-2 flex items-center gap-2.5 px-1 py-2">
+              <Logo size={32} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-extrabold leading-tight">{worker?.name ?? agency?.name}</p>
+                <p className="truncate text-[0.66rem] text-faint">{worker ? agency?.name : agency?.email}</p>
+              </div>
+              <button onClick={() => setMore(false)} aria-label={t('cancel')}
+                className="grid size-9 place-items-center rounded-full border text-muted cursor-pointer">
+                <X size={15} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {[...PRIMARY, ...secondary].filter(visible).map((id) => (
+                <NavItem key={id} id={id} onClick={() => setMore(false)} />
+              ))}
+            </div>
+            <div className="flex flex-col gap-1 border-t pt-2">
+              <button onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+                className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold text-muted cursor-pointer">
+                <Languages size={17} />{lang === 'ar' ? 'English' : 'العربية'}
+              </button>
+              <button onClick={toggleTheme}
+                className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold text-muted cursor-pointer">
+                {dark ? <Sun size={17} /> : <Moon size={17} />}{dark ? 'Light' : 'Dark'}
+              </button>
+              <button onClick={signOut}
+                className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold text-[var(--danger)] cursor-pointer">
+                <LogOut size={17} />{t('logout')}
+              </button>
+            </div>
+          </div>
+          <style>{`
+            @keyframes fade{from{opacity:0}to{opacity:1}}
+            @keyframes drawer{from{transform:translateX(var(--from,100%))}to{transform:none}}
+            [dir=rtl] [style*="drawer"]{--from:-100%}
+          `}</style>
+        </div>
+      )}
+
       {/* mobile dock */}
       <nav className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md rounded-2xl border p-1 shadow-[var(--shadow-lg)] backdrop-blur-xl md:hidden"
         style={{ background: 'color-mix(in oklab, var(--surface) 92%, transparent)' }}>
@@ -117,7 +160,7 @@ export function Shell({ tab, setTab, children }: {
           const Icon = ICON[id]; const on = tab === id;
           return (
             <button key={id} onClick={() => { setTab(id); setMore(false); }}
-              className={cn('relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-[0.58rem] font-extrabold transition-all duration-200 cursor-pointer',
+              className={cn('relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.58rem] font-extrabold transition-all duration-200 cursor-pointer',
                 on ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--text-faint)] active:scale-95')}>
               <Icon size={18} className={cn('transition-transform', on && 'scale-110')} />{t(LABEL[id])}
             </button>
@@ -132,21 +175,6 @@ export function Shell({ tab, setTab, children }: {
         )}
       </nav>
 
-      {/* overflow sheet */}
-      {more && (
-        <div className="fixed inset-0 z-45 bg-black/50 backdrop-blur-sm md:hidden" onClick={() => setMore(false)}>
-          <div className="absolute inset-x-3 bottom-20 mx-auto max-w-md rounded-2xl border p-1.5 surface shadow-[var(--shadow-lg)]"
-            onClick={(e) => e.stopPropagation()}>
-            {secondary.map((id) => <NavItem key={id} id={id} onClick={() => setMore(false)} />)}
-            <button onClick={signOut} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-[var(--danger)] cursor-pointer">
-              <LogOut size={17} />{t('logout')}
-            </button>
-            <button onClick={() => setMore(false)} className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs text-faint cursor-pointer">
-              <X size={13} />{t('cancel')}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
