@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/lib/store';
-import { Button, Card, Chip, Empty, Field, Input, Select, Textarea } from '@/components/ui/primitives';
+import { Button, Card, Chip, Empty, Field, FilterPill, FilterRow, Input, Select } from '@/components/ui/primitives';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { InvoiceSheet } from '@/components/InvoiceSheet';
 import { totals, nextNumber, unbilledFor, liveLines } from '@/lib/invoice';
@@ -91,15 +91,13 @@ export function Invoices() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <FilterRow>
         {(['', ...STATUS] as const).map((v) => (
-          <button key={v || 'all'} onClick={() => setFilter(v as InvoiceStatus | '')}
-            className={`rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
-              filter === v ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'surface text-muted'}`}>
+          <FilterPill key={v || 'all'} active={filter === v} onClick={() => setFilter(v)}>
             {v ? t(v) : t('all')}
-          </button>
+          </FilterPill>
         ))}
-      </div>
+      </FilterRow>
 
       <Card className="overflow-hidden">
         {list.length === 0 ? <Empty icon={<Receipt size={22} />} title={t('no_invoices')} /> : (

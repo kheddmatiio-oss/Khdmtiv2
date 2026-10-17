@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useApp } from '@/lib/store';
-import { Button, Card, Chip, Empty, Field, Input, Select, Textarea } from '@/components/ui/primitives';
+import { Button, Card, Chip, Empty, Field, FilterPill, FilterRow, Input, Select, Textarea } from '@/components/ui/primitives';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { uid, today, fmtDate, isPast } from '@/lib/utils';
 import type { Task, TaskStatus } from '@/lib/types';
@@ -73,16 +73,13 @@ export function Tasks() {
         </Button>
       </header>
 
-      <div className="flex gap-1.5">
+      <FilterRow>
         {(['open', 'done', 'all'] as const).map((v) => (
-          <button key={v} onClick={() => setView(v)}
-            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
-              view === v ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'surface text-muted'}`}>
+          <FilterPill key={v} active={view === v} count={counts[v]} onClick={() => setView(v)}>
             {t(v === 'open' ? 'open_tasks' : v === 'done' ? 'done' : 'all')}
-            <span className="tnum opacity-70">{counts[v]}</span>
-          </button>
+          </FilterPill>
         ))}
-      </div>
+      </FilterRow>
 
       <Card className="overflow-hidden">
         {list.length === 0 ? <Empty icon={<CheckSquare size={22} />} title={t('no_tasks')} /> : (

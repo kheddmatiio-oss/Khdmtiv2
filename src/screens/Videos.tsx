@@ -81,14 +81,15 @@ export function Videos() {
           <Input className="ps-9" placeholder={t('search')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Select className="w-auto flex-1" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)}>
+          <Select className="min-h-11 w-auto flex-1" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)}>
             <option value="">{t('clients')} — {t('all')}</option>
             {data.clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </Select>
           <div className="flex gap-1 rounded-xl bg-[var(--surface-2)] p-1">
             {(['all', 'unpaid', 'paid'] as Filter[]).map((v) => (
               <button key={v} onClick={() => setPaidFilter(v)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
+                aria-pressed={paidFilter === v}
+                className={`min-h-10 flex-1 rounded-lg px-3 text-xs font-bold transition-colors cursor-pointer ${
                   paidFilter === v ? 'surface text-[var(--accent)] shadow-[var(--shadow-sm)]' : 'text-muted'}`}>
                 {t(v === 'all' ? 'all' : v === 'paid' ? 'paid' : 'unpaid')}
               </button>
@@ -107,7 +108,9 @@ export function Videos() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <p className="truncate text-sm font-bold">{v.title || '—'}</p>
-                    <button onClick={() => togglePaid(v)} className="cursor-pointer">
+                    <button onClick={() => togglePaid(v)} aria-pressed={v.paid}
+                      aria-label={v.paid ? t('paid') : t('unpaid')}
+                      className="relative cursor-pointer after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-['']">
                       <Chip tone={v.paid ? 'accent' : 'neutral'}>{v.paid ? t('paid') : t('unpaid')}</Chip>
                     </button>
                   </div>

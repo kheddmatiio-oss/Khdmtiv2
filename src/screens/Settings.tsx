@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useApp } from '@/lib/store';
-import { Button, Card, Field, Input, Section, Select, Textarea } from '@/components/ui/primitives';
+import { Button, Card, Field, FilterPill, FilterRow, Input, Section, Select, Textarea } from '@/components/ui/primitives';
 import { ALL_CURRENCIES } from '@/lib/money';
 import type { Currency, Settings as S } from '@/lib/types';
 import { Building2, Receipt, Wallet, Palette, Trash2, Upload } from 'lucide-react';
@@ -42,15 +42,13 @@ export function SettingsScreen() {
     <div className={`flex flex-col gap-4 ${dirty ? 'pb-20' : ''}`}>
       <h1 className="text-2xl font-black tracking-tight">{t('settings')}</h1>
 
-      <div className="flex flex-wrap gap-1.5">
+      <FilterRow>
         {TABS.map(([v, label, icon]) => (
-          <button key={v} onClick={() => setTab(v)}
-            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors cursor-pointer ${
-              tab === v ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]' : 'surface text-muted'}`}>
+          <FilterPill key={v} active={tab === v} onClick={() => setTab(v)}>
             {icon}{label}
-          </button>
+          </FilterPill>
         ))}
-      </div>
+      </FilterRow>
 
       {tab === 'company' && (
         <Section title={t('sec_company')}>

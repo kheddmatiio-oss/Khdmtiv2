@@ -149,6 +149,39 @@ export const Stat = ({ label, value, tone }: { label: ReactNode; value: ReactNod
   </span>
 );
 
+/* ── Filters ─────────────────────────────────────────────── */
+/** One pill, used for every filter row, so touch sizing and the active
+ *  treatment stay identical across screens. */
+export function FilterPill({ active, count, children, onClick }: {
+  active?: boolean; count?: number; children: ReactNode; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'relative inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold',
+        'transition-colors cursor-pointer',
+        // keeps a thumb-sized hit area without growing the pill
+        "after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-['']",
+        active
+          ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]'
+          : 'surface text-muted hover:text-[var(--text)]',
+      )}
+    >
+      {children}
+      {count !== undefined && <span className="tnum opacity-70">{count}</span>}
+    </button>
+  );
+}
+
+/** Horizontal filter strip that scrolls instead of wrapping on a phone. */
+export const FilterRow = ({ children }: { children: ReactNode }) => (
+  <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]{display:none}">
+    {children}
+  </div>
+);
+
 /* ── Empty state ─────────────────────────────────────────── */
 export function Empty({ icon, title, hint, action, compact }: {
   icon: ReactNode; title: ReactNode; hint?: ReactNode; action?: ReactNode; compact?: boolean;
