@@ -46,6 +46,7 @@ export type Settings = {
   invoice: { vat: number; paymentMode: string; object: string; prefix: string; lang: 'ar' | 'en' | 'fr' };
   currency: { base: Currency; list: { code: Currency; rate: number }[] };
   theme: { accent: string };
+  onboarding: { dismissed: boolean };
 };
 
 export type AppData = {

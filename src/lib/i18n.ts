@@ -82,6 +82,18 @@ const ar = {
   slide3_sub: 'المدفوع والباقي والمتأخر — بكل عملة على حدة',
   next: 'التالي',
   skip: 'تخطّى',
+  // onboarding
+  getting_started: 'ابدأ من هنا',
+  gs_sub: 'ثلاث خطوات وتكون واجد',
+  gs_progress: '{0} من {1}',
+  step_client: 'زيد أول زبون',
+  step_client_desc: 'الاسم يكفي — الأرقام الجبائية تزيدها كي تحتاجها',
+  step_video: 'سجّل أول خدمة',
+  step_video_desc: 'العنوان والسعر والعملة',
+  step_invoice: 'أنشئ أول فاتورة',
+  step_invoice_desc: 'تتبنى من خدمتك، وتطلع A4 جاهزة للطباعة',
+  gs_done_title: 'واجد!',
+  gs_done_sub: 'منصتك جاهزة للخدمة',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -156,6 +168,17 @@ const en: Dict = {
   slide3_sub: 'Paid, outstanding and overdue — each currency on its own',
   next: 'Next',
   skip: 'Skip',
+  getting_started: 'Start here',
+  gs_sub: 'Three steps and you are set up',
+  gs_progress: '{0} of {1}',
+  step_client: 'Add your first client',
+  step_client_desc: 'A name is enough — fiscal details can wait',
+  step_video: 'Log your first job',
+  step_video_desc: 'Title, price and currency',
+  step_invoice: 'Create your first invoice',
+  step_invoice_desc: 'Built from your logged work, printed on A4',
+  gs_done_title: 'All set',
+  gs_done_sub: 'Your workspace is ready',
 };
 
 export const DICT = { ar, en } as const;

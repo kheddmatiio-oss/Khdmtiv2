@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: Settings = {
   invoice: { vat: 0, paymentMode: '', object: '', prefix: 'F', lang: 'fr' },
   currency: { base: 'DZD', list: [{ code: 'DZD', rate: 1 }, { code: 'USD', rate: 135 }, { code: 'EUR', rate: 150 }] },
   theme: { accent: '' },
+  onboarding: { dismissed: false },
 };
 
 export const EMPTY_DATA: AppData = {
@@ -32,6 +33,7 @@ export function normalize(d: Partial<AppData> | null | undefined): AppData {
         list: s?.currency?.list?.length ? s.currency.list : DEFAULT_SETTINGS.currency.list,
       },
       theme: { ...DEFAULT_SETTINGS.theme, ...(s?.theme ?? {}) },
+      onboarding: { ...DEFAULT_SETTINGS.onboarding, ...(s?.onboarding ?? {}) },
     },
   };
 }

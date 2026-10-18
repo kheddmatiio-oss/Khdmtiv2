@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import { useApp } from '@/lib/store';
 import { Button, Card, Chip, Empty } from '@/components/ui/primitives';
+import { GettingStarted } from '@/components/GettingStarted';
 import { buildInsights, ago, type Activity } from '@/lib/insights';
 import { totals } from '@/lib/invoice';
 import { money, showMap, type CurrencyMap } from '@/lib/money';
@@ -18,7 +19,24 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
   const s = useMemo(() => buildInsights(data, worker?.id), [data, worker]);
   const dash = money(0, base, lang);
 
-  if (!data.clients.length && !data.videos.length) {
+  // the guide stays until all three steps are done, or it is skipped
+  const setupDone = data.clients.length > 0 && data.videos.length > 0 && data.invoices.length > 0;
+  const showGuide = !data.settings.onboarding.dismissed && !setupDone;
+  const blank = !data.clients.length && !data.videos.length;
+
+  if (blank && showGuide) {
+    return (
+      <div className="flex flex-col gap-5">
+        <header className="min-w-0">
+          <h1 className="truncate text-xl font-black tracking-tight sm:text-2xl">{t('dashboard')}</h1>
+          <p className="truncate text-xs text-muted">{worker?.name ?? agency?.name}</p>
+        </header>
+        <GettingStarted setTab={setTab} />
+      </div>
+    );
+  }
+
+  if (blank) {
     return (
       <Empty
         icon={<Film size={24} />}
@@ -45,6 +63,8 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
           <Plus size={16} />{t('new_video')}
         </Button>
       </header>
+
+      {showGuide && <GettingStarted setTab={setTab} />}
 
       {/* financial position, four plain figures */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
