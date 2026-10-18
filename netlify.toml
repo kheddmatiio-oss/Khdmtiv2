@@ -1,0 +1,5 @@
+# Netlify detects Next.js and sets the build command and publish directory
+# itself. This only pins the runtime so a local build and a deployed build
+# agree. Supabase keys live in Netlify's environment variables, never here.
+[build.environment]
+  NODE_VERSION = "20"
