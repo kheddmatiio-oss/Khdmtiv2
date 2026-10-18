@@ -4,6 +4,7 @@ import { useApp } from '@/lib/store';
 import { cn } from '@/lib/cn';
 import { Logo } from './Logo';
 import { Button } from './ui/primitives';
+import { SupportChat } from './SupportChat';
 import type { Key } from '@/lib/i18n';
 import {
   LayoutGrid, Film, CheckSquare, Receipt, Briefcase, Users, Settings as Cog,
@@ -105,6 +106,7 @@ export function Shell({ tab, setTab, children }: {
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-5 pb-28 md:px-6 md:py-7 md:pb-10">
           {children}
         </main>
+        <SupportChat />
       </div>
 
       {/* mobile drawer — the full nav, not a stub */}

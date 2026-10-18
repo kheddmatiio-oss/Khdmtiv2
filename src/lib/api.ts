@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { normalize } from './defaults';
-import type { AppData, Agency, Editor } from './types';
+import type { AppData, Agency, Editor, SupportMessage, SupportThread } from './types';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_KEY;
@@ -106,6 +106,20 @@ export const api = {
     if (t) { try { await rpc<void>('api_logout', { p_token: t }); } catch { /* best effort */ } }
     setToken(null);
   },
+
+  // support chat — one thread per workspace, with the super admin
+  supportSend: (body: string) =>
+    rpc<SupportMessage>('api_support_send', { p_token: getToken(), p_body: body }),
+  supportList: () =>
+    rpc<SupportMessage[]>('api_support_list', { p_token: getToken() }),
+  supportUnread: () =>
+    rpc<number>('api_support_unread', { p_token: getToken() }),
+  adminSupportThreads: () =>
+    rpc<SupportThread[]>('api_admin_support_threads', { p_token: getToken() }),
+  adminSupportList: (agencyId: string) =>
+    rpc<SupportMessage[]>('api_admin_support_list', { p_token: getToken(), p_agency: agencyId }),
+  adminSupportSend: (agencyId: string, body: string) =>
+    rpc<SupportMessage>('api_admin_support_send', { p_token: getToken(), p_agency: agencyId, p_body: body }),
 
   // super-admin — the RPCs verify is_super themselves
   adminAgencies: () => rpc<Agency[]>('api_admin_agencies', { p_token: getToken() }),

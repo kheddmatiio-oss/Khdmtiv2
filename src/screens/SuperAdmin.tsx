@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 import { Button, Card, Chip, Empty, Field, Input, Select, Textarea } from '@/components/ui/primitives';
 import { Modal, ModalActions } from '@/components/ui/Modal';
+import { SupportInbox } from '@/components/SupportInbox';
 import { fmtDate } from '@/lib/utils';
 import type { Agency, AppData } from '@/lib/types';
 import { Crown, LogOut, Pencil, Trash2, Eye, Sun, Moon, Languages, ShieldCheck, Ban } from 'lucide-react';
@@ -82,6 +83,8 @@ export function SuperAdmin() {
             ))}
           </div>
         )}
+
+        <SupportInbox />
 
         <Card className="overflow-hidden">
           {!rows ? <Empty icon={<ShieldCheck size={22} />} title={t('loading')} />

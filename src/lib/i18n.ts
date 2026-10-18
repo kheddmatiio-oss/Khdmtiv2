@@ -94,6 +94,16 @@ const ar = {
   step_invoice_desc: 'تتبنى من خدمتك، وتطلع A4 جاهزة للطباعة',
   gs_done_title: 'واجد!',
   gs_done_sub: 'منصتك جاهزة للخدمة',
+  // support
+  support: 'الدعم',
+  support_hint: 'اكتب سؤالك ونجاوبك هنا',
+  support_empty: 'ما كاين حتى رسالة — اكتب أول وحدة',
+  support_you: 'انت',
+  support_team: 'الدعم',
+  send: 'إرسال',
+  write_message: 'اكتب رسالتك…',
+  support_threads: 'المحادثات',
+  no_threads: 'ما كاين حتى محادثة',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -179,6 +189,15 @@ const en: Dict = {
   step_invoice_desc: 'Built from your logged work, printed on A4',
   gs_done_title: 'All set',
   gs_done_sub: 'Your workspace is ready',
+  support: 'Support',
+  support_hint: 'Ask your question and we will answer here',
+  support_empty: 'No messages yet — send the first one',
+  support_you: 'You',
+  support_team: 'Support',
+  send: 'Send',
+  write_message: 'Write your message…',
+  support_threads: 'Conversations',
+  no_threads: 'No conversations yet',
 };
 
 export const DICT = { ar, en } as const;

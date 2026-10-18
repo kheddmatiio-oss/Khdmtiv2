@@ -62,6 +62,16 @@ export type Agency = {
   plan_expires_at?: string | null; notes?: string; created_at?: string;
 };
 
+export type SupportMessage = {
+  id: string; agency_id: string; from_admin: boolean;
+  body: string; seen: boolean; created_at: string;
+};
+
+export type SupportThread = {
+  agency_id: string; agency_name: string; agency_email: string;
+  last_at: string; last_body: string; unread: number;
+};
+
 export type Session =
   | { kind: 'agency'; agency: Agency }
   | { kind: 'worker'; agency: Agency; worker: Editor };
