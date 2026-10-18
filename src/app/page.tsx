@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useApp } from '@/lib/store';
+import { configError } from '@/lib/api';
 import { Auth } from '@/screens/Auth';
 import { Dashboard } from '@/screens/Dashboard';
 import { Clients } from '@/screens/Clients';
@@ -19,6 +20,7 @@ export default function Page() {
   const { phase, agency } = useApp();
   const [tab, setTab] = useState<TabId>('dashboard');
 
+  if (configError) return <ConfigError />;
   if (phase === 'booting') return <Boot />;
   if (phase === 'anon') return <Auth />;
   if (agency?.is_super) return <SuperAdmin />;
@@ -39,6 +41,27 @@ export default function Page() {
       {tab === 'settings' && <SettingsScreen />}
       </div>
     </Shell>
+  );
+}
+
+/** Shown when the build had no Supabase keys — tells whoever deployed it
+ *  exactly what to fix, rather than failing silently. */
+function ConfigError() {
+  return (
+    <div className="grid min-h-dvh place-items-center px-4">
+      <Card className="flex max-w-md flex-col items-center gap-3 p-8 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl"
+          style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>
+          <Ban size={24} />
+        </span>
+        <p className="text-lg font-black">Configuration incomplete</p>
+        <p className="text-sm text-muted">{configError}</p>
+        <p className="text-xs text-faint">
+          Add them in your host&apos;s environment variables, then redeploy — these
+          values are baked in at build time.
+        </p>
+      </Card>
+    </div>
   );
 }
 

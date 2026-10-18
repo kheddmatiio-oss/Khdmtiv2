@@ -2,10 +2,21 @@ import { createClient } from '@supabase/supabase-js';
 import { normalize } from './defaults';
 import type { AppData, Agency, Editor } from './types';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const key = process.env.NEXT_PUBLIC_SUPABASE_KEY!;
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-export const sb = createClient(url, key, { auth: { persistSession: false } });
+/** NEXT_PUBLIC_* values are inlined at build time, so a deploy built without
+ *  them ships a client that cannot connect. Fail with something readable
+ *  instead of a blank page. */
+export const configError = !url || !key
+  ? 'Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_KEY'
+  : null;
+
+export const sb = createClient(
+  url ?? 'https://placeholder.supabase.co',
+  key ?? 'placeholder',
+  { auth: { persistSession: false } },
+);
 
 const TOKEN_KEY = 'khedmti.token';
 export const getToken = () =>
