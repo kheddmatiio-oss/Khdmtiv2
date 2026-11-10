@@ -60,6 +60,24 @@ export type Agency = {
   account_type: 'agency' | 'solo';
   is_active: boolean; is_super: boolean;
   plan_expires_at?: string | null; notes?: string; created_at?: string;
+  ref_code?: string; referred_by?: string | null;
+};
+
+export type CurrencyTotals = Record<string, number>;
+
+export type AffiliateMe = {
+  code: string; rate: number;
+  referrals: { name: string; plan: string; created_at: string }[];
+  commissions: {
+    id: string; name: string; amount: number; currency: string; rate: number;
+    status: 'pending' | 'paid'; created_at: string; paid_at: string | null;
+  }[];
+};
+
+export type AffiliateRow = {
+  id: string; name: string; email: string; ref_code: string;
+  referrals: number; paying: number; pending_count: number;
+  pending: CurrencyTotals; paid: CurrencyTotals;
 };
 
 export type SupportMessage = {

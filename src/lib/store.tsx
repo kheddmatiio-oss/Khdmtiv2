@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { api, ApiError, getToken } from './api';
+import { api, ApiError, getToken, captureRef } from './api';
 import { EMPTY_DATA } from './defaults';
 import { translate, DIR, type Key, type Lang } from './i18n';
 import type { AppData, Agency, Editor } from './types';
@@ -53,6 +53,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /* preferences + session restore */
   useEffect(() => {
+    captureRef();
     // English is what a first-time visitor sees; a saved choice still wins
     const l = (localStorage.getItem(LS.lang) as Lang) || 'en';
     const d = localStorage.getItem(LS.theme) !== 'light';

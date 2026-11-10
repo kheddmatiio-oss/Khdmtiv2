@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { normalize } from './defaults';
-import type { AppData, Agency, Editor, SupportMessage, SupportThread } from './types';
+import type { AppData, Agency, Editor, SupportMessage, SupportThread, AffiliateMe, AffiliateRow } from './types';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_KEY;
@@ -25,6 +25,17 @@ export const setToken = (t: string | null) => {
   if (typeof window === 'undefined') return;
   t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY);
 };
+
+/** A ?ref= code seen on arrival is kept until sign-up, so a visitor who
+ *  browses first and registers later is still credited. */
+const REF_KEY = 'khedmti.ref';
+export const captureRef = () => {
+  if (typeof window === 'undefined') return;
+  const code = new URLSearchParams(window.location.search).get('ref');
+  if (code && /^[a-z0-9]{4,16}$/i.test(code)) localStorage.setItem(REF_KEY, code.toLowerCase());
+};
+const getRef = () => (typeof window === 'undefined' ? null : localStorage.getItem(REF_KEY));
+const clearRef = () => { if (typeof window !== 'undefined') localStorage.removeItem(REF_KEY); };
 
 /** Server-side error codes raised by the SQL functions. */
 export type ApiCode =
@@ -69,8 +80,10 @@ export const api = {
   async register(name: string, email: string, password: string, phone = '', type: 'agency' | 'solo' = 'agency') {
     const r = await rpc<AuthResult>('api_register', {
       p_name: name, p_email: email, p_password: password, p_phone: phone, p_type: type,
+      p_ref: getRef(),
     });
     setToken(r.token);
+    clearRef();
     return r.agency;
   },
 
@@ -121,10 +134,29 @@ export const api = {
   adminSupportSend: (agencyId: string, body: string) =>
     rpc<SupportMessage>('api_admin_support_send', { p_token: getToken(), p_agency: agencyId, p_body: body }),
 
+  // affiliates
+  affiliateMe: () => rpc<AffiliateMe>('api_affiliate_me', { p_token: getToken() }),
+  adminAffiliates: () =>
+    rpc<{ rate: number; rows: AffiliateRow[] }>('api_admin_affiliates', { p_token: getToken() }),
+  adminAffiliatePaid: (id: string) =>
+    rpc<number>('api_admin_affiliate_paid', { p_token: getToken(), p_affiliate: id }),
+  adminSetRate: (rate: number) =>
+    rpc<void>('api_admin_set_rate', { p_token: getToken(), p_rate: rate }),
+  /** Activates or renews a paid plan and records the payment; a referred
+   *  account earns its referrer a commission server-side. */
+  adminRecordPayment: (id: string, amount: number, currency: string, plan: 'basic' | 'pro', days: number) =>
+    rpc<unknown>('api_admin_record_payment', {
+      p_token: getToken(), p_agency: id, p_amount: amount, p_currency: currency, p_plan: plan, p_days: days,
+    }),
+
   // super-admin — the RPCs verify is_super themselves
   adminAgencies: () => rpc<Agency[]>('api_admin_agencies', { p_token: getToken() }),
   adminData: (id: string) => rpc<Partial<AppData>>('api_admin_data', { p_token: getToken(), p_agency: id }).then(normalize),
   adminUpdate: (id: string, patch: Partial<Agency>) =>
     rpc<void>('api_admin_update', { p_token: getToken(), p_agency: id, p_patch: patch }),
   adminDelete: (id: string) => rpc<void>('api_admin_delete', { p_token: getToken(), p_agency: id }),
+  /** bcrypt cannot be reversed, so a reset replaces the hash and drops every
+   *  session on that account. */
+  adminSetPassword: (id: string, password: string) =>
+    rpc<void>('api_admin_set_password', { p_token: getToken(), p_agency: id, p_password: password }),
 };

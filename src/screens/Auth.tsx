@@ -6,10 +6,11 @@ import { Logo } from '@/components/Logo';
 import { Welcome } from '@/components/Welcome';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
+import { supportLink } from '@/lib/support';
 import type { Key } from '@/lib/i18n';
 import {
   Building2, User, Mail, Lock, Phone, ArrowLeft, Languages, Sun, Moon,
-  Eye, EyeOff, Check,
+  Eye, EyeOff, Check, MessageCircle,
 } from 'lucide-react';
 
 type Mode = 'landing' | 'signin' | 'signup';
@@ -202,10 +203,42 @@ function AuthForm({ mode, onBack, onDone }: {
             : state === 'busy' ? (signup ? t('creating') : t('signing_in'))
             : (signup ? t('start_free') : t('signin'))}
         </Button>
+        {!signup && <ForgotPassword email={f.email} />}
+
         <Button type="button" variant="ghost" size="sm" onClick={onBack} className="min-h-10">
           <ArrowLeft size={13} className="rtl:rotate-180" />{t('back')}
         </Button>
       </form>
     </Card>
+  );
+}
+
+function ForgotPassword({ email }: { email: string }) {
+  const { t } = useApp();
+  const [open, setOpen] = useState(false);
+  const href = supportLink(
+    `${t('forgot_pw')} — ${email || '…'}`,
+  );
+
+  return (
+    <div className="text-center">
+      <button type="button" onClick={() => setOpen((v) => !v)}
+        className="min-h-10 px-2 text-xs font-bold text-[var(--accent)] hover:underline cursor-pointer">
+        {t('forgot_pw')}
+      </button>
+      {open && (
+        <div className="fade-in mt-1 rounded-xl border p-3 text-start"
+          style={{ background: 'var(--surface-2)' }}>
+          <p className="text-[0.72rem] leading-relaxed text-muted">{t('forgot_help')}</p>
+          {href && (
+            <a href={href} target="_blank" rel="noreferrer"
+              className="mt-2 flex min-h-10 items-center justify-center gap-1.5 rounded-lg text-xs font-bold text-white"
+              style={{ background: 'var(--accent)' }}>
+              <MessageCircle size={13} />{t('contact_support')}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

@@ -6,9 +6,10 @@ import { Logo } from '@/components/Logo';
 import { Button, Card, Chip, Empty, Field, Input, Select, Textarea } from '@/components/ui/primitives';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { SupportInbox } from '@/components/SupportInbox';
+import { AffiliatesAdmin } from '@/components/AffiliatesAdmin';
 import { fmtDate } from '@/lib/utils';
 import type { Agency, AppData } from '@/lib/types';
-import { Crown, LogOut, Pencil, Trash2, Eye, Sun, Moon, Languages, ShieldCheck, Ban } from 'lucide-react';
+import { Crown, LogOut, Pencil, Trash2, Eye, Sun, Moon, Languages, ShieldCheck, Ban, KeyRound } from 'lucide-react';
 
 const daysLeft = (a: Agency) =>
   a.plan_expires_at ? Math.max(0, Math.ceil((+new Date(a.plan_expires_at) - Date.now()) / 86400000)) : null;
@@ -19,6 +20,8 @@ export function SuperAdmin() {
   const [rows, setRows] = useState<Agency[] | null>(null);
   const [editing, setEditing] = useState<Agency | null>(null);
   const [peek, setPeek] = useState<{ agency: Agency; data: AppData } | null>(null);
+  // bumped after a payment so the affiliate totals reload with the new commission
+  const [tick, setTick] = useState(0);
 
   const refresh = () => api.adminAgencies().then(setRows).catch(() => toast(t('err_net'), 'err'));
   useEffect(() => { refresh(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -85,6 +88,7 @@ export function SuperAdmin() {
         )}
 
         <SupportInbox />
+        <AffiliatesAdmin refreshKey={tick} />
 
         <Card className="overflow-hidden">
           {!rows ? <Empty icon={<ShieldCheck size={22} />} title={t('loading')} />
@@ -129,7 +133,8 @@ export function SuperAdmin() {
         </Card>
       </main>
 
-      {editing && <AgencyForm agency={editing} onClose={() => setEditing(null)} onSave={update} />}
+      {editing && <AgencyForm agency={editing} onClose={() => setEditing(null)} onSave={update}
+        onPaid={() => { setEditing(null); refresh(); setTick((n) => n + 1); }} />}
       {peek && (
         <Modal title={peek.agency.name} onClose={() => setPeek(null)}>
           <div className="grid grid-cols-3 gap-2">
@@ -148,49 +153,90 @@ export function SuperAdmin() {
   );
 }
 
-function AgencyForm({ agency, onClose, onSave }: {
-  agency: Agency; onClose: () => void; onSave: (id: string, patch: Partial<Agency>) => void;
+function AgencyForm({ agency, onClose, onSave, onPaid }: {
+  agency: Agency; onClose: () => void;
+  onSave: (id: string, patch: Partial<Agency>) => void;
+  onPaid: () => void;
 }) {
-  const { t } = useApp();
-  const [plan, setPlan] = useState(agency.plan);
-  const [days, setDays] = useState('30');
+  const { t, toast } = useApp();
   const [active, setActive] = useState(agency.is_active);
   const [notes, setNotes] = useState(agency.notes ?? '');
+  const [downgrade, setDowngrade] = useState(false);
+
+  // paid plans are only ever set through a recorded payment, so no renewal
+  // can slip past the affiliate who brought the account in
+  const [payPlan, setPayPlan] = useState<'basic' | 'pro'>(agency.plan === 'basic' ? 'basic' : 'pro');
+  const [payDays, setPayDays] = useState('30');
+  const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState('DZD');
+  const [paying, setPaying] = useState(false);
+
+  const [newPw, setNewPw] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  const resetPassword = async () => {
+    if (newPw.length < 4) return toast(t('err_pw'), 'err');
+    setResetting(true);
+    try { await api.adminSetPassword(agency.id, newPw); setNewPw(''); toast(t('reset_pw_done')); }
+    catch { toast(t('err_net'), 'err'); }
+    finally { setResetting(false); }
+  };
+
+  const recordPayment = async () => {
+    const n = Number(amount);
+    if (!(n >= 0) || amount === '') return toast(t('amount_paid'), 'err');
+    setPaying(true);
+    try {
+      await api.adminRecordPayment(agency.id, n, currency, payPlan, Number(payDays));
+      toast(t('payment_recorded'));
+      onPaid();
+    } catch { toast(t('err_net'), 'err'); }
+    finally { setPaying(false); }
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const patch: Partial<Agency> = { plan, is_active: active, notes };
-    if (plan === 'free') patch.plan_expires_at = null;
-    else if (days) {
-      const d = new Date(); d.setDate(d.getDate() + Number(days));
-      patch.plan_expires_at = d.toISOString();
-    }
+    const patch: Partial<Agency> = { is_active: active, notes };
+    if (downgrade) { patch.plan = 'free'; patch.plan_expires_at = null; }
     onSave(agency.id, patch);
   };
 
   return (
     <Modal title={agency.name} onClose={onClose}>
       <form onSubmit={submit} className="flex flex-col gap-3.5">
-        <Field label="Plan">
-          <div className="grid grid-cols-3 gap-1 rounded-xl bg-[var(--surface-2)] p-1">
-            {(['free', 'basic', 'pro'] as const).map((p) => (
-              <button key={p} type="button" onClick={() => setPlan(p)}
-                className={`rounded-lg py-2 text-xs font-bold capitalize transition-colors cursor-pointer ${
-                  plan === p ? 'surface text-[var(--accent)] shadow-[var(--shadow-sm)]' : 'text-muted'}`}>
-                {p}
-              </button>
-            ))}
-          </div>
-        </Field>
-        {plan !== 'free' && (
-          <Field label="Duration">
-            <Select value={days} onChange={(e) => setDays(e.target.value)}>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-              <option value="365">365 days</option>
+        {/* record a payment — activates or renews, and credits the referrer */}
+        <div className="rounded-xl border p-3" style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent-border)' }}>
+          <p className="mb-2.5 text-xs font-extrabold" style={{ color: 'var(--accent)' }}>{t('record_payment')}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={payPlan} onChange={(e) => setPayPlan(e.target.value as 'basic' | 'pro')} className="min-h-11">
+              <option value="basic">Basic</option>
+              <option value="pro">Pro</option>
             </Select>
-          </Field>
+            <Select value={payDays} onChange={(e) => setPayDays(e.target.value)} className="min-h-11">
+              <option value="30">30 d</option>
+              <option value="90">90 d</option>
+              <option value="365">365 d</option>
+            </Select>
+            <Input type="number" inputMode="decimal" min="0" step="any" placeholder={t('amount_paid')}
+              className="tnum min-h-11" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Select value={currency} onChange={(e) => setCurrency(e.target.value)} className="min-h-11">
+              {['DZD', 'EUR', 'USD'].map((c) => <option key={c} value={c}>{c}</option>)}
+            </Select>
+          </div>
+          <Button type="button" variant="primary" className="mt-2.5 w-full" loading={paying}
+            disabled={amount === ''} onClick={recordPayment}>
+            {t('record_payment')}
+          </Button>
+        </div>
+
+        {agency.plan !== 'free' && (
+          <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-3 text-sm font-bold">
+            <input type="checkbox" checked={downgrade} onChange={(e) => setDowngrade(e.target.checked)}
+              className="size-4 accent-[var(--danger)]" />
+            <span style={{ color: downgrade ? 'var(--danger)' : undefined }}>→ free</span>
+          </label>
         )}
+
         <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-3"
           style={{ background: active ? 'var(--accent-soft)' : 'var(--danger-soft)' }}>
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)}
@@ -202,6 +248,19 @@ function AgencyForm({ agency, onClose, onSave }: {
         <Field label="Notes">
           <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Field>
+
+        <div className="rounded-xl border p-3">
+          <Field label={t('reset_pw')} hint={t('reset_pw_hint')}>
+            <div className="flex gap-2">
+              <Input type="text" autoComplete="off" className="flex-1" value={newPw}
+                onChange={(e) => setNewPw(e.target.value)} placeholder="••••••" />
+              <Button type="button" onClick={resetPassword} loading={resetting} disabled={newPw.length < 4}>
+                <KeyRound size={14} />
+              </Button>
+            </div>
+          </Field>
+        </div>
+
         <ModalActions>
           <Button type="button" className="flex-1" onClick={onClose}>{t('cancel')}</Button>
           <Button type="submit" variant="primary" className="flex-1">{t('save')}</Button>

@@ -4,9 +4,10 @@ import { useApp } from '@/lib/store';
 import { Button, Card, Field, FilterPill, FilterRow, Input, Section, Select, Textarea } from '@/components/ui/primitives';
 import { ALL_CURRENCIES } from '@/lib/money';
 import type { Currency, Settings as S } from '@/lib/types';
-import { Building2, Receipt, Wallet, Palette, Trash2, Upload } from 'lucide-react';
+import { Building2, Receipt, Wallet, Palette, Trash2, Upload, Gift } from 'lucide-react';
+import { AffiliatePanel } from '@/components/AffiliatePanel';
 
-type Tab = 'company' | 'invoice' | 'currency' | 'appearance';
+type Tab = 'company' | 'invoice' | 'currency' | 'appearance' | 'affiliate';
 const PALETTE = ['', '#0D7CFB', '#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981', '#14B8A6', '#0EA5E9'];
 const MAX_LOGO = 500 * 1024;
 
@@ -35,6 +36,7 @@ export function SettingsScreen() {
     ['invoice', t('sec_invoice'), <Receipt key="b" size={13} />],
     ['currency', t('sec_currency'), <Wallet key="c" size={13} />],
     ['appearance', t('sec_appearance'), <Palette key="d" size={13} />],
+    ['affiliate', t('affiliate'), <Gift key="e" size={13} />],
   ];
   const C = draft.company, I = draft.invoice;
 
@@ -49,6 +51,8 @@ export function SettingsScreen() {
           </FilterPill>
         ))}
       </FilterRow>
+
+      {tab === 'affiliate' && <AffiliatePanel />}
 
       {tab === 'company' && (
         <Section title={t('sec_company')}>
