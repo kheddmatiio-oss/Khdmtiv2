@@ -9,7 +9,7 @@
 -- ═══════════════════════════════════════════════════════════════
 
 -- ── 1. الإحالة على الحسابات ────────────────────────────────────
-alter table agencies add column if not exists ref_code    text;
+alter table agencies add column if not exists ref_code text;
 alter table agencies add column if not exists referred_by uuid references agencies(id) on delete set null;
 
 update agencies set ref_code = lower(substr(md5(id::text || 'khedmti'), 1, 7))
