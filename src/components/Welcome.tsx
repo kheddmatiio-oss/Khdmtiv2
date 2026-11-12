@@ -4,7 +4,9 @@ import { useApp } from '@/lib/store';
 import { Logo } from './Logo';
 import { Button } from './ui/primitives';
 import { cn } from '@/lib/cn';
-import { LayoutGrid, Users, Zap, ArrowRight } from 'lucide-react';
+import { LayoutGrid, Users, Zap, ArrowRight, Gift, ChevronDown } from 'lucide-react';
+import { LandingSections } from './LandingSections';
+import { priceLabel } from '@/lib/pricing';
 import type { Key } from '@/lib/i18n';
 
 const SLIDES: { title: Key | 'app'; sub: Key }[] = [
@@ -23,6 +25,14 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
   const { t, lang } = useApp();
   const [i, setI] = useState(0);
   const touchX = useRef<number | null>(null);
+  // arriving through someone's link is worth acknowledging
+  const [invited, setInvited] = useState(false);
+  useEffect(() => {
+    try {
+      // the URL is checked too: on a first visit the code has not been stored yet
+      setInvited(!!localStorage.getItem('khedmti.ref') || /[?&]ref=[a-z0-9]{4,16}/i.test(window.location.search));
+    } catch { /* private mode */ }
+  }, []);
 
   // advances on its own, but any interaction hands control back to the reader
   const [auto, setAuto] = useState(true);
@@ -48,22 +58,28 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
   const slide = SLIDES[i];
 
   return (
+    <div style={{ background: '#060B14' }}>
     <div
       className="relative flex min-h-dvh flex-col overflow-hidden"
-      style={{ background: '#060B14' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
       <Backdrop />
 
       <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-14 text-center">
+        {invited && (
+          <span className="fade-in mb-6 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-extrabold"
+            style={{ borderColor: 'rgba(13,124,251,.5)', background: 'rgba(13,124,251,.16)', color: '#9CCBFF' }}>
+            <Gift size={13} />{t('lp_invited')}
+          </span>
+        )}
         <Logo size={76} />
 
-        <div key={i} className="fade-in mt-6 flex min-h-[7.5rem] flex-col items-center">
-          <h1 className="text-[2.4rem] font-black leading-tight tracking-tight text-white">
+        <div key={i} className="fade-in mt-6 flex min-h-[7.5rem] flex-col items-center md:min-h-[10.5rem]">
+          <h1 className="text-[2.4rem] font-black leading-tight tracking-tight text-white md:text-6xl">
             {slide.title === 'app' ? t('app') : t(slide.title)}
           </h1>
-          <p className="mt-2.5 max-w-[19rem] text-sm leading-relaxed text-white/60">
+          <p className="mt-2.5 max-w-[19rem] text-sm leading-relaxed text-white/60 md:mt-4 md:max-w-md md:text-lg">
             {t(slide.sub)}
           </p>
         </div>
@@ -78,7 +94,13 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
             className="min-h-13 cursor-pointer rounded-2xl border border-white/12 bg-white/[.04] text-sm font-bold text-white/85 backdrop-blur-sm transition-colors hover:bg-white/[.08]">
             {t('have_account')}
           </button>
+          <p className="tnum text-[0.72rem] leading-relaxed text-white/45">{t('lp_under_cta', priceLabel(lang))}</p>
         </div>
+
+        <a href="#product"
+          className="mt-8 flex min-h-11 items-center gap-1.5 text-xs font-bold text-white/55 transition-colors hover:text-white">
+          {t('lp_scroll')}<ChevronDown size={14} className="animate-bounce" />
+        </a>
       </div>
 
       {/* what the product actually does */}
@@ -104,6 +126,8 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
           ))}
         </div>
       </div>
+    </div>
+    <LandingSections onSignUp={onSignUp} />
     </div>
   );
 }

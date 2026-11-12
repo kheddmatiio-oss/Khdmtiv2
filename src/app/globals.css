@@ -137,3 +137,6 @@ html[data-theme="dark"] {
 }
 
 @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .3 } }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
