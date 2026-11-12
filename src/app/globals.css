@@ -5,8 +5,13 @@
    · Deep Navy #0B111A · Charcoal #1A1D22 · Soft Gray #F4F7FB
    Blue carries paid/done/active. Neutral gray carries pending
    and draft. Red is alerts only — never decoration.          */
+/* `inline` so the family resolves where it is used: the font variables are
+   set on <html> by next/font, not known at theme-build time. */
+@theme inline {
+  --font-sans: var(--font-latin), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+}
+
 @theme {
-  --font-sans: var(--font-tajawal), ui-sans-serif, system-ui, sans-serif;
 
   --color-brand-50:  #EAF3FF;
   --color-brand-100: #D4E7FF;
@@ -84,7 +89,19 @@ html[data-theme="dark"] {
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss01';
   }
+  /* a breath of the brand colour behind the workspace, so the dark theme
+     has depth instead of a flat slab */
+  html[data-theme="dark"] body {
+    background:
+      radial-gradient(60rem 34rem at 88% -8%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 70%),
+      radial-gradient(46rem 30rem at -6% 108%, color-mix(in oklab, var(--color-brand-700) 16%, transparent), transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { letter-spacing: 0; }
   /* digits line up in every table and total */
   .tnum { font-variant-numeric: tabular-nums; }
   ::selection { background: var(--accent-soft); }
@@ -127,6 +144,11 @@ html[data-theme="dark"] {
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-sm);
   }
+  /* a hairline of light along the top edge reads as a lit surface */
+  html[data-theme="dark"] .card {
+    background: linear-gradient(180deg, color-mix(in oklab, var(--surface) 92%, #fff) 0%, var(--surface) 28%);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgb(255 255 255 / .045);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -140,3 +162,16 @@ html[data-theme="dark"] {
 
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* ── landing motion ───────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+@keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+@keyframes aurora { 0%,100% { transform: translate3d(0,0,0) scale(1) } 50% { transform: translate3d(4%,-3%,0) scale(1.08) } }
+@keyframes sheen { from { background-position: 0% 50% } to { background-position: 200% 50% } }
+.grad-text {
+  background: linear-gradient(90deg, #7CC0FF, #0D7CFB 40%, #9AD0FF 70%, #7CC0FF);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 7s linear infinite;
+}

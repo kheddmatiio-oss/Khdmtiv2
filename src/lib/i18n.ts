@@ -189,6 +189,10 @@ const ar = {
   lp_p4: 'عملات متعددة', lp_p5: 'الفريق والمهام', lp_p6: 'دعم مباشر من داخل المنصة',
   lp_aff: 'اربح مع خدمتي', lp_aff_sub: 'كل مستعمل عندو رابط خاص. شارك الرابط، وكل واحد يشترك من عندك تاخذ عمولة على كل تجديد يديرو.',
   lp_cta: 'جرّبها اليوم', lp_cta_sub: '14 يوم كاملة، كل المميزات مفتوحة، وبلا بطاقة بنكية.',
+  lp_h1a: 'خدمتك منظّمة.', lp_h1b: 'فواتيرك جاهزة.',
+  lp_hero_sub: 'مساحة الخدمة تاع الإيديتور: تتبّع كل فيديو من الطلب حتى التسليم، وفوترو بالصيغة الجزائرية بضغطة.',
+  lp_nav_features: 'المميزات', lp_nav_price: 'السعر', lp_made: 'مصنوعة للإيديتورز في الجزائر',
+  lp_mock_due: 'يتسلّم غدوة', lp_mock_rev: 'المداخيل',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -362,6 +366,10 @@ const en: Dict = {
   lp_p4: 'Multi-currency', lp_p5: 'Team and tasks', lp_p6: 'Direct support inside the app',
   lp_aff: 'Earn with Khedmti', lp_aff_sub: 'Every user gets a personal link. Share it, and earn a commission on every renewal from the people you bring in.',
   lp_cta: 'Try it today', lp_cta_sub: '14 full days, every feature unlocked, no bank card.',
+  lp_h1a: 'Your edits, organised.', lp_h1b: 'Your invoices, done.',
+  lp_hero_sub: 'The workspace for video editors: follow every video from brief to delivery, then invoice it in the Algerian format in one tap.',
+  lp_nav_features: 'Features', lp_nav_price: 'Pricing', lp_made: 'Made for video editors in Algeria',
+  lp_mock_due: 'Due tomorrow', lp_mock_rev: 'Revenue',
 };
 
 export const DICT = { ar, en } as const;

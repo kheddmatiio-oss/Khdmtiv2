@@ -28,19 +28,7 @@ export function Auth() {
 
   if (mode === 'landing') {
     return (
-      <>
-        <div className="absolute end-3 top-3 z-10 flex gap-1">
-          <Button size="sm" variant="ghost" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="!text-white/70 hover:!bg-white/10">
-            <Languages size={14} />{lang === 'ar' ? 'EN' : 'ع'}
-          </Button>
-          <Button size="sm" variant="ghost" onClick={toggleTheme} aria-label="theme"
-            className="!text-white/70 hover:!bg-white/10">
-            {dark ? <Sun size={14} /> : <Moon size={14} />}
-          </Button>
-        </div>
-        <Welcome onSignUp={() => setMode('signup')} onSignIn={() => setMode('signin')} />
-      </>
+      <Welcome onSignUp={() => setMode('signup')} onSignIn={() => setMode('signin')} />
     );
   }
 
