@@ -167,6 +167,7 @@ const ar = {
   quick_pick: 'اختيار سريع', services_tip: 'زيد خدماتك وأسعارها في الإعدادات باش السعر يتعمّر بضغطة.',
   revenue_6m: 'المداخيل — آخر 6 أشهر', vs_last_month: 'على الشهر اللي فات',
   then_price: 'من بعد {0} / الشهر', price_month: '{0} / الشهر',
+  amount_words: 'أوقفت هذه الفاتورة عند مبلغ', signature: 'الختم والإمضاء', paid_stamp: 'مدفوعة', gross_total: 'المجموع الخام',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -319,6 +320,7 @@ const en: Dict = {
   quick_pick: 'Quick pick', services_tip: 'Add your services and prices in Settings to fill the price in one tap.',
   revenue_6m: 'Revenue — last 6 months', vs_last_month: 'vs last month',
   then_price: 'Then {0} / month', price_month: '{0} / month',
+  amount_words: 'This invoice is closed at the sum of', signature: 'Stamp and signature', paid_stamp: 'PAID', gross_total: 'Gross total',
 };
 
 export const DICT = { ar, en } as const;
