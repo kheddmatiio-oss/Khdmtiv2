@@ -16,6 +16,7 @@ import { Logo } from '@/components/Logo';
 import { Card, Button, Skeleton, ListSkeleton } from '@/components/ui/primitives';
 import { SupportChat } from '@/components/SupportChat';
 import { supportLink } from '@/lib/support';
+import { priceLabel } from '@/lib/pricing';
 import { Clock, Ban, MessageCircle, RefreshCw } from 'lucide-react';
 
 export default function Page() {
@@ -68,7 +69,7 @@ function ConfigError() {
 }
 
 function Blocked({ suspended }: { suspended: boolean }) {
-  const { t, signOut, agency, refreshAgency, toast } = useApp();
+  const { t, lang, signOut, agency, refreshAgency, toast } = useApp();
   const [busy, setBusy] = useState(false);
   const trial = agency?.plan === 'trial';
   const title = suspended ? t('suspended') : trial ? t('trial_over') : t('sub_over');
@@ -96,6 +97,10 @@ function Blocked({ suspended }: { suspended: boolean }) {
         <div>
           <p className="text-lg font-black">{title}</p>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">{sub}</p>
+          {!suspended && (
+            <p className="tnum mt-3 inline-block rounded-xl px-3 py-2 text-sm font-black text-[var(--accent)]"
+              style={{ background: 'var(--accent-soft)' }}>{t('price_month', priceLabel(lang))}</p>
+          )}
         </div>
         <div className="flex w-full flex-col gap-2">
           {href && (

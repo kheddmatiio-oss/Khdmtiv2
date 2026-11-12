@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn';
 import { Logo } from './Logo';
 import { Button } from './ui/primitives';
 import { SupportChat } from './SupportChat';
+import { priceLabel } from '@/lib/pricing';
 import type { Key } from '@/lib/i18n';
 import {
   LayoutGrid, Film, CheckSquare, Receipt, Briefcase, Users, Settings as Cog,
@@ -84,6 +85,7 @@ export function Shell({ tab, setTab, children }: {
               <Hourglass size={13} />{t('trial_plan')}
             </p>
             <p className="mt-1 text-xs font-bold">{trialLabel}</p>
+            <p className="tnum mt-0.5 text-[0.64rem] text-muted">{t('then_price', priceLabel(lang))}</p>
             <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--surface)]">
               <div className="h-full rounded-full" style={{ background: 'var(--accent)', width: `${Math.min(100, (trialDays / 14) * 100)}%` }} />
             </div>

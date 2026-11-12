@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useApp } from '@/lib/store';
 import { Button, Card, Chip, Empty } from '@/components/ui/primitives';
 import { GettingStarted } from '@/components/GettingStarted';
+import { RevenueChart } from '@/components/RevenueChart';
 import { buildInsights, ago, type Activity } from '@/lib/insights';
 import { totals } from '@/lib/invoice';
 import { money, showMap, type CurrencyMap } from '@/lib/money';
@@ -85,6 +86,8 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
           onClick={() => setTab('invoices')}
         />
       </div>
+
+      <RevenueChart videos={worker ? data.videos.filter((v) => v.editorId === worker.id) : data.videos} base={base} />
 
       {deadlines.length > 0 && (
         <Panel title={t('deadlines')} icon={<CalendarClock size={14} />} onMore={() => setTab('videos')}

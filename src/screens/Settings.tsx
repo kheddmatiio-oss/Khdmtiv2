@@ -4,10 +4,11 @@ import { useApp } from '@/lib/store';
 import { Button, Card, Field, FilterPill, FilterRow, Input, Section, Select, Textarea } from '@/components/ui/primitives';
 import { ALL_CURRENCIES } from '@/lib/money';
 import type { Currency, Settings as S } from '@/lib/types';
-import { Building2, Receipt, Wallet, Palette, Trash2, Upload, Gift } from 'lucide-react';
+import { Building2, Receipt, Wallet, Palette, Trash2, Upload, Gift, Tags, Plus } from 'lucide-react';
+import { uid } from '@/lib/utils';
 import { AffiliatePanel } from '@/components/AffiliatePanel';
 
-type Tab = 'company' | 'invoice' | 'currency' | 'appearance' | 'affiliate';
+type Tab = 'company' | 'services' | 'invoice' | 'currency' | 'appearance' | 'affiliate';
 const PALETTE = ['', '#0D7CFB', '#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981', '#14B8A6', '#0EA5E9'];
 const MAX_LOGO = 500 * 1024;
 
@@ -33,6 +34,7 @@ export function SettingsScreen() {
 
   const TABS: [Tab, string, React.ReactNode][] = [
     ['company', t('sec_company'), <Building2 key="a" size={13} />],
+    ['services', t('sec_services'), <Tags key="s" size={13} />],
     ['invoice', t('sec_invoice'), <Receipt key="b" size={13} />],
     ['currency', t('sec_currency'), <Wallet key="c" size={13} />],
     ['appearance', t('sec_appearance'), <Palette key="d" size={13} />],
@@ -53,6 +55,44 @@ export function SettingsScreen() {
       </FilterRow>
 
       {tab === 'affiliate' && <AffiliatePanel />}
+
+      {tab === 'services' && (
+        <Section title={t('sec_services')}>
+          <div className="flex flex-col gap-3 p-4">
+            <p className="text-xs leading-relaxed text-muted">{t('services_hint')}</p>
+            {draft.services.length === 0 && (
+              <p className="rounded-xl border border-dashed px-3 py-5 text-center text-xs text-faint">{t('no_services')}</p>
+            )}
+            {draft.services.map((sv) => {
+              const patch = (x: Partial<typeof sv>) => setDraft((p) => ({
+                ...p, services: p.services.map((y) => (y.id === sv.id ? { ...y, ...x } : y)),
+              }));
+              return (
+                <div key={sv.id} className="grid grid-cols-[1fr_auto] gap-2 rounded-xl border bg-[var(--surface-2)] p-2 sm:grid-cols-[1fr_8rem_5.5rem_auto]">
+                  <Input className="min-h-11 bg-[var(--surface)]" placeholder={t('service_name')} aria-label={t('service_name')}
+                    value={sv.name} onChange={(e) => patch({ name: e.target.value })} />
+                  <Button variant="ghost" className="min-h-11 sm:order-last" aria-label={t('delete')}
+                    onClick={() => setDraft((p) => ({ ...p, services: p.services.filter((y) => y.id !== sv.id) }))}>
+                    <Trash2 size={15} className="text-[var(--danger)]" />
+                  </Button>
+                  <Input type="number" inputMode="decimal" min="0" step="any" className="tnum min-h-11 bg-[var(--surface)]"
+                    placeholder={t('price')} aria-label={t('price')}
+                    value={sv.price || ''} onChange={(e) => patch({ price: Number(e.target.value) })} />
+                  <Select className="min-h-11 bg-[var(--surface)]" aria-label={t('currency')} value={sv.currency}
+                    onChange={(e) => patch({ currency: e.target.value as Currency })}>
+                    {draft.currency.list.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+                  </Select>
+                </div>
+              );
+            })}
+            <Button className="min-h-11 self-start" onClick={() => setDraft((p) => ({
+              ...p, services: [...p.services, { id: uid(), name: '', price: 0, currency: p.currency.base }],
+            }))}>
+              <Plus size={15} />{t('add_service')}
+            </Button>
+          </div>
+        </Section>
+      )}
 
       {tab === 'company' && (
         <Section title={t('sec_company')}>

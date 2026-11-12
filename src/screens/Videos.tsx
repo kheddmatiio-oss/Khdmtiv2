@@ -12,7 +12,7 @@ import {
 import type { Video, Currency, VideoStage } from '@/lib/types';
 import {
   Film, Pencil, Trash2, Plus, Search, ClipboardList, Scissors, Eye, RefreshCcw, CheckCheck,
-  ArrowRight, CalendarClock, Link2, Columns3, List as ListIcon, GripVertical,
+  ArrowRight, CalendarClock, Link2, Columns3, List as ListIcon, GripVertical, Tags,
 } from 'lucide-react';
 
 type Filter = 'all' | 'paid' | 'unpaid';
@@ -450,8 +450,9 @@ function VideoForm({ initial, stage, onClose, onSave, onDelete }: {
   initial: Video | null; stage: VideoStage; onClose: () => void;
   onSave: (v: Video) => void; onDelete?: () => void;
 }) {
-  const { t, data, agency, worker } = useApp();
+  const { t, lang, data, agency, worker } = useApp();
   const st = data.settings;
+  const services = st.services.filter((x) => x.name.trim() && x.price > 0);
   const solo = agency?.account_type === 'solo';
   const selfId = worker?.id ?? 'self';
 
@@ -479,6 +480,34 @@ function VideoForm({ initial, stage, onClose, onSave, onDelete }: {
   return (
     <Modal title={initial ? t('edit') : t('new_video')} onClose={onClose}>
       <form onSubmit={submit} className="flex flex-col gap-3.5">
+        {services.length > 0 ? (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-bold text-muted">{t('quick_pick')}</span>
+            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+              {services.map((sv) => {
+                const on = f.price === sv.price && f.currency === sv.currency && f.title.startsWith(sv.name);
+                return (
+                  <button key={sv.id} type="button" aria-pressed={on}
+                    onClick={() => setF({
+                      ...f, price: sv.price, currency: sv.currency,
+                      // only fill the title when it is empty or still an untouched pick
+                      title: !f.title.trim() || services.some((x) => x.name === f.title) ? sv.name : f.title,
+                    })}
+                    className={cn('flex min-h-11 shrink-0 flex-col items-start justify-center rounded-xl border px-3 text-start transition-colors cursor-pointer',
+                      on ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'hover:bg-[var(--surface-2)]')}>
+                    <span className={cn('text-[0.72rem] font-extrabold leading-tight', on && 'text-[var(--accent)]')}>{sv.name}</span>
+                    <span className="tnum text-[0.62rem] text-muted">{money(sv.price, sv.currency, lang)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : !initial && !worker && (
+          <p className="flex items-start gap-2 rounded-xl px-3 py-2 text-[0.68rem] leading-relaxed text-muted" style={{ background: 'var(--surface-2)' }}>
+            <Tags size={13} className="mt-0.5 shrink-0 text-[var(--accent)]" />{t('services_tip')}
+          </p>
+        )}
+
         <Field label={t('video_title')}>
           <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} autoFocus={!initial} />
         </Field>

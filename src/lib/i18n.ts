@@ -161,6 +161,12 @@ const ar = {
   more_n: '+{0} أخرى', show_less: 'أقل', open_file: 'افتح الملف',
   deadlines: 'مواعيد التسليم', pipeline_value: 'قيمة الخدمة الجارية',
   delivered_toast: 'تسلّم الفيديو ✓', add_here: 'زيد هنا',
+  // price list + chart + subscription price
+  sec_services: 'خدماتي وأسعاري', services_hint: 'الخدمات اللي تبيعها بأسعارها — تختار منها كي تسجّل فيديو والسعر يتعمّر وحدو.',
+  service_name: 'اسم الخدمة', add_service: 'زيد خدمة', no_services: 'ما كاين حتى خدمة بعد',
+  quick_pick: 'اختيار سريع', services_tip: 'زيد خدماتك وأسعارها في الإعدادات باش السعر يتعمّر بضغطة.',
+  revenue_6m: 'المداخيل — آخر 6 أشهر', vs_last_month: 'على الشهر اللي فات',
+  then_price: 'من بعد {0} / الشهر', price_month: '{0} / الشهر',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -308,6 +314,11 @@ const en: Dict = {
   more_n: '+{0} more', show_less: 'Less', open_file: 'Open file',
   deadlines: 'Deadlines', pipeline_value: 'Value in progress',
   delivered_toast: 'Video delivered ✓', add_here: 'Add here',
+  sec_services: 'Services & prices', services_hint: 'What you sell and for how much — pick one when logging a video and the price fills in.',
+  service_name: 'Service name', add_service: 'Add service', no_services: 'No services yet',
+  quick_pick: 'Quick pick', services_tip: 'Add your services and prices in Settings to fill the price in one tap.',
+  revenue_6m: 'Revenue — last 6 months', vs_last_month: 'vs last month',
+  then_price: 'Then {0} / month', price_month: '{0} / month',
 };
 
 export const DICT = { ar, en } as const;

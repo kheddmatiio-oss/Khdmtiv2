@@ -54,7 +54,10 @@ export type Settings = {
   currency: { base: Currency; list: { code: Currency; rate: number }[] };
   theme: { accent: string };
   onboarding: { dismissed: boolean };
+  /** Price list: what this editor sells, so a video's price is one tap. */
+  services: Service[];
 };
+export type Service = { id: string; name: string; price: number; currency: Currency };
 
 export type AppData = {
   editors: Editor[]; clients: Client[]; videos: Video[];

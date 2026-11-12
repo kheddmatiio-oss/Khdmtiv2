@@ -7,6 +7,7 @@ import { Welcome } from '@/components/Welcome';
 import { Button, Card, Field, Input } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
 import { supportLink } from '@/lib/support';
+import { priceLabel } from '@/lib/pricing';
 import type { Key } from '@/lib/i18n';
 import {
   Building2, User, Mail, Lock, Phone, ArrowLeft, Languages, Sun, Moon,
@@ -71,7 +72,7 @@ export function Auth() {
 /** What the trial gives you — a full panel beside the form on desktop,
  *  a compact strip above it on phones so the form stays in reach. */
 function TrialPanel() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const points: Key[] = ['trial_b1', 'trial_b2', 'trial_b3', 'trial_b4'];
   return (
     <div className="relative overflow-hidden rounded-2xl p-4 text-white md:flex md:flex-col md:justify-between md:p-7"
@@ -85,6 +86,8 @@ function TrialPanel() {
         </span>
         <h1 className="mt-3 text-lg font-black leading-snug md:text-2xl">{t('trial_title')}</h1>
         <p className="mt-1.5 text-xs leading-relaxed text-white/60 md:text-sm">{t('trial_sub')}</p>
+        <p className="tnum mt-3 inline-block rounded-lg px-2.5 py-1.5 text-xs font-extrabold text-white/90"
+          style={{ background: 'rgba(255,255,255,.08)' }}>{t('then_price', priceLabel(lang))}</p>
       </div>
       <ul className="relative mt-4 hidden flex-col gap-3 md:flex">
         {points.map((k) => (

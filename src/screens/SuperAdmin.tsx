@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useApp } from '@/lib/store';
+import { PRICE } from '@/lib/pricing';
 import { api } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 import { Button, Card, Chip, Empty, Field, Input, Select, Textarea } from '@/components/ui/primitives';
@@ -167,7 +168,7 @@ function AgencyForm({ agency, onClose, onSave, onPaid }: {
   // can slip past the affiliate who brought the account in
   const [payPlan, setPayPlan] = useState<'basic' | 'pro'>(agency.plan === 'basic' ? 'basic' : 'pro');
   const [payDays, setPayDays] = useState('30');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(String(PRICE.amount));
   const [currency, setCurrency] = useState('DZD');
   const [paying, setPaying] = useState(false);
 
@@ -212,7 +213,12 @@ function AgencyForm({ agency, onClose, onSave, onPaid }: {
               <option value="basic">Basic</option>
               <option value="pro">Pro</option>
             </Select>
-            <Select value={payDays} onChange={(e) => setPayDays(e.target.value)} className="min-h-11">
+            <Select value={payDays} className="min-h-11" onChange={(e) => {
+              // keep the suggested amount in step with the period, unless it was typed by hand
+              const auto = (d: string) => String(Math.round(PRICE.amount * Number(d) / PRICE.days));
+              if (amount === '' || amount === auto(payDays)) setAmount(auto(e.target.value));
+              setPayDays(e.target.value);
+            }}>
               <option value="30">30 d</option>
               <option value="90">90 d</option>
               <option value="365">365 d</option>

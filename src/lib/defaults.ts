@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: Settings = {
   currency: { base: 'DZD', list: [{ code: 'DZD', rate: 1 }, { code: 'USD', rate: 135 }, { code: 'EUR', rate: 150 }] },
   theme: { accent: '' },
   onboarding: { dismissed: false },
+  services: [],
 };
 
 export const EMPTY_DATA: AppData = {
@@ -34,6 +35,7 @@ export function normalize(d: Partial<AppData> | null | undefined): AppData {
       },
       theme: { ...DEFAULT_SETTINGS.theme, ...(s?.theme ?? {}) },
       onboarding: { ...DEFAULT_SETTINGS.onboarding, ...(s?.onboarding ?? {}) },
+      services: s?.services ?? [],
     },
   };
 }
