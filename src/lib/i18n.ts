@@ -150,6 +150,17 @@ const ar = {
   sub_over: 'انتهى الاشتراك', sub_over_sub: 'بياناتك محفوظة. جدّد الاشتراك باش تكمّل.',
   suspended: 'الحساب موقوف', suspended_sub: 'تواصل معنا باش نشوفو المشكل.',
   subscribe: 'اشترك', ive_paid: 'دفعت — حدّث', still_blocked: 'مازال ما تسجّلتش الدفعة',
+  // pipeline
+  stage: 'المرحلة', stage_brief: 'مطلوب', stage_editing: 'مونتاج', stage_review: 'مراجعة',
+  stage_revision: 'تعديلات', stage_delivered: 'تسلّم',
+  view_board: 'لوحة', view_list: 'قائمة',
+  deadline: 'موعد التسليم', file_link: 'رابط الملف', revisions_n: 'عدد التعديلات',
+  due_in: 'باقي {0} يوم', due_tomorrow: 'غدوة', late_by: 'متأخر {0} يوم',
+  move_to: 'حوّل لـ «{0}»', in_pipeline: 'قيد الخدمة', due_week: 'هذا الأسبوع', late_n: 'متأخرة',
+  col_empty: 'ما كاين والو هنا', drop_here: 'حطّ هنا',
+  more_n: '+{0} أخرى', show_less: 'أقل', open_file: 'افتح الملف',
+  deadlines: 'مواعيد التسليم', pipeline_value: 'قيمة الخدمة الجارية',
+  delivered_toast: 'تسلّم الفيديو ✓', add_here: 'زيد هنا',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -287,6 +298,16 @@ const en: Dict = {
   sub_over: 'Subscription expired', sub_over_sub: 'Your data is safe. Renew to continue.',
   suspended: 'Account suspended', suspended_sub: 'Contact us so we can sort it out.',
   subscribe: 'Subscribe', ive_paid: 'I paid — refresh', still_blocked: 'Payment not recorded yet',
+  stage: 'Stage', stage_brief: 'Brief', stage_editing: 'Editing', stage_review: 'Review',
+  stage_revision: 'Revisions', stage_delivered: 'Delivered',
+  view_board: 'Board', view_list: 'List',
+  deadline: 'Deadline', file_link: 'File link', revisions_n: 'Revision rounds',
+  due_in: '{0} days left', due_tomorrow: 'Tomorrow', late_by: '{0} days late',
+  move_to: 'Move to “{0}”', in_pipeline: 'In progress', due_week: 'Due this week', late_n: 'Late',
+  col_empty: 'Nothing here', drop_here: 'Drop here',
+  more_n: '+{0} more', show_less: 'Less', open_file: 'Open file',
+  deadlines: 'Deadlines', pipeline_value: 'Value in progress',
+  delivered_toast: 'Video delivered ✓', add_here: 'Add here',
 };
 
 export const DICT = { ar, en } as const;

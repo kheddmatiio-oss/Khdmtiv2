@@ -124,7 +124,7 @@ export function Shell({ tab, setTab, children }: {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-5 pb-28 md:px-6 md:py-7 md:pb-10">
+        <main className={cn('mx-auto w-full flex-1 px-4 py-5 pb-28 md:px-6 md:py-7 md:pb-10', tab === 'videos' ? 'max-w-[92rem]' : 'max-w-5xl')}>
           {children}
         </main>
         <SupportChat />

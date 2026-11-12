@@ -7,10 +7,11 @@ import { buildInsights, ago, type Activity } from '@/lib/insights';
 import { totals } from '@/lib/invoice';
 import { money, showMap, type CurrencyMap } from '@/lib/money';
 import { fmtDate, today } from '@/lib/utils';
+import { STAGE_LABEL, STAGE_TONE, stageOf, dueState, byUrgency } from '@/lib/pipeline';
 import type { TabId } from '@/components/Shell';
 import {
   Plus, TrendingUp, CircleCheck, Clock, TriangleAlert, Film, Receipt,
-  CheckSquare, ChevronLeft,
+  CheckSquare, ChevronLeft, CalendarClock,
 } from 'lucide-react';
 
 export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
@@ -18,6 +19,11 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
   const base = data.settings.currency.base;
   const s = useMemo(() => buildInsights(data, worker?.id), [data, worker]);
   const dash = money(0, base, lang);
+
+  // work in progress that has a date on it, nearest first
+  const deadlines = useMemo(() => (worker ? data.videos.filter((v) => v.editorId === worker.id) : data.videos)
+    .filter((v) => stageOf(v) !== 'delivered' && v.due)
+    .sort(byUrgency).slice(0, 5), [data.videos, worker]);
 
   // the guide stays until all three steps are done, or it is skipped
   const setupDone = data.clients.length > 0 && data.videos.length > 0 && data.invoices.length > 0;
@@ -79,6 +85,34 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
           onClick={() => setTab('invoices')}
         />
       </div>
+
+      {deadlines.length > 0 && (
+        <Panel title={t('deadlines')} icon={<CalendarClock size={14} />} onMore={() => setTab('videos')}
+          badge={deadlines.filter((v) => dueState(v)?.late).length || undefined}>
+          <ul>
+            {deadlines.map((v) => {
+              const d = dueState(v)!;
+              const st = stageOf(v);
+              return (
+                <li key={v.id} className="row flex items-center gap-3 border-b px-4 py-2.5 last:border-0">
+                  <span aria-hidden className="size-1.5 shrink-0 rounded-full"
+                    style={{ background: d.late ? 'var(--danger)' : STAGE_TONE[st] }} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{v.title || '—'}</span>
+                    <span className="block truncate text-[0.66rem] text-muted">
+                      {data.clients.find((c) => c.id === v.clientId)?.name ?? '—'} · {t(STAGE_LABEL[st])}
+                    </span>
+                  </span>
+                  <span className="tnum shrink-0 text-[0.68rem] font-bold"
+                    style={{ color: d.late ? 'var(--danger)' : d.soon ? 'var(--accent)' : 'var(--text-faint)' }}>
+                    {d.late ? t('late_by', -d.days) : d.days === 0 ? t('today') : d.days === 1 ? t('due_tomorrow') : t('due_in', d.days)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </Panel>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* recent work */}

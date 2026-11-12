@@ -12,7 +12,14 @@ export type Video = {
   id: string; title: string; clientId: string; editorId: string;
   date: string; price: number; currency: Currency; paid: boolean;
   createdAt?: string;
+  /** Where the work stands. Videos logged before the pipeline existed have
+   *  no stage and count as delivered — they were recorded as finished work. */
+  stage?: VideoStage;
+  due?: string;          // delivery deadline
+  revisions?: number;    // rounds of client changes so far
+  link?: string;         // Drive / Frame.io / wherever the file lives
 };
+export type VideoStage = 'brief' | 'editing' | 'review' | 'revision' | 'delivered';
 
 export type InvoiceLine = {
   id: string; ref: string; desc: string;
