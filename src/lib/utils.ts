@@ -14,3 +14,8 @@ export const matches = (q: string, ...fields: (string | undefined)[]) => {
   if (!s) return true;
   return fields.some((f) => (f ?? '').toLowerCase().includes(s));
 };
+
+/** Suspended, or a trial/subscription whose date has passed. The server
+ *  applies the same rule, so this only decides which screen to show. */
+export const isBlocked = (a?: { is_active: boolean; plan: string; plan_expires_at?: string | null } | null) =>
+  !!a && (!a.is_active || (a.plan !== 'free' && !!a.plan_expires_at && new Date(a.plan_expires_at) < new Date()));

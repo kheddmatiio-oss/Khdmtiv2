@@ -17,6 +17,7 @@ import { Card, Button, Skeleton, ListSkeleton } from '@/components/ui/primitives
 import { SupportChat } from '@/components/SupportChat';
 import { supportLink } from '@/lib/support';
 import { priceLabel } from '@/lib/pricing';
+import { isBlocked } from '@/lib/utils';
 import { Clock, Ban, MessageCircle, RefreshCw } from 'lucide-react';
 
 export default function Page() {
@@ -28,9 +29,7 @@ export default function Page() {
   if (phase === 'anon') return <Auth />;
   if (agency?.is_super) return <SuperAdmin />;
 
-  const suspended = agency && !agency.is_active;
-  const expired = agency?.plan_expires_at && new Date(agency.plan_expires_at) < new Date() && agency.plan !== 'free';
-  if (suspended || expired) return <Blocked suspended={!!suspended} />;
+  if (isBlocked(agency)) return <Blocked suspended={!agency!.is_active} />;
 
   return (
     <Shell tab={tab} setTab={setTab}>
@@ -69,7 +68,7 @@ function ConfigError() {
 }
 
 function Blocked({ suspended }: { suspended: boolean }) {
-  const { t, lang, signOut, agency, refreshAgency, toast } = useApp();
+  const { t, lang, signOut, agency, unlock, toast } = useApp();
   const [busy, setBusy] = useState(false);
   const trial = agency?.plan === 'trial';
   const title = suspended ? t('suspended') : trial ? t('trial_over') : t('sub_over');
@@ -79,10 +78,8 @@ function Blocked({ suspended }: { suspended: boolean }) {
   // a payment recorded by the admin unlocks the account without a re-login
   const recheck = async () => {
     setBusy(true);
-    const a = await refreshAgency();
-    setBusy(false);
-    const open = a && a.is_active && !(a.plan_expires_at && new Date(a.plan_expires_at) < new Date() && a.plan !== 'free');
-    if (!open) toast(t('still_blocked'), 'err');
+    const ok = await unlock();
+    if (!ok) { toast(t('still_blocked'), 'err'); setBusy(false); }
   };
 
   return (

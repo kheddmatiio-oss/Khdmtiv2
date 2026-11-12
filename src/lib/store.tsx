@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { isBlocked } from './utils';
 import { api, ApiError, getToken, captureRef } from './api';
 import { EMPTY_DATA } from './defaults';
 import { translate, DIR, type Key, type Lang } from './i18n';
@@ -22,6 +23,8 @@ type Store = {
   reload: () => Promise<void>;
   /** Re-read plan/expiry from the server; returns the fresh account. */
   refreshAgency: () => Promise<Agency | null>;
+  /** True once a blocked account is open again and its data is loaded. */
+  unlock: () => Promise<boolean>;
   saving: boolean;
   toasts: Toast[]; toast: (msg: string, tone?: 'ok' | 'err') => void;
 };
@@ -63,18 +66,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const raw = localStorage.getItem(LS.session);
     if (!raw || !getToken()) { setPhase('anon'); return; }
+    let cached: Agency;
     try {
       const s = JSON.parse(raw);
+      cached = s.agency;
       setAgency(s.agency); setWorker(s.worker ?? null);
     } catch { setPhase('anon'); return; }
 
     // the cached session is only a hint — the token decides
-    api.load()
-      .then(async (d2) => { setData(d2); await refreshAgency(); setPhase('ready'); })
-      .catch(() => {
+    (async () => {
+      const fresh = (await refreshAgency()) ?? cached;
+      // an expired account has nothing to load: the server refuses, and the
+      // blocked screen is what the user needs to see — not the login page
+      if (isBlocked(fresh)) { setPhase('ready'); return; }
+      try {
+        setData(await api.load()); setPhase('ready');
+      } catch (e) {
+        if (e instanceof ApiError && e.code === 'account_blocked') { setPhase('ready'); return; }
         localStorage.removeItem(LS.session);
         setAgency(null); setWorker(null); setPhase('anon');
-      });
+      }
+    })();
   }, []);
 
   /* reflect language + theme on <html> */
@@ -138,9 +150,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAgency(a); setWorker(w ?? null);
     localStorage.setItem(LS.session, JSON.stringify({ agency: a, worker: w ?? null }));
     if (d) { setData(d); setPhase('ready'); return; }
+    if (isBlocked(a)) { setPhase('ready'); return; }   // nothing to load; the blocked screen takes over
     api.load().then((d2) => { setData(d2); setPhase('ready'); })
-      .catch(() => { setData(EMPTY_DATA); setPhase('ready'); });
-  }, []);
+      .catch((e) => {
+        if (e instanceof ApiError && e.code === 'account_blocked') { setPhase('ready'); return; }
+        // Never open the workspace on data that failed to load: it would look
+        // empty, and the first edit would save that emptiness over the real data.
+        localStorage.removeItem(LS.session);
+        setAgency(null); setWorker(null); setPhase('anon');
+        toast(translate(lang, 'err_net'), 'err');
+      });
+  }, [lang, toast]);
 
   const signOut = useCallback(async () => {
     await api.logout();
@@ -161,10 +181,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => { setData(await api.load()); }, []);
 
+  /** After a payment: load the data first, and only then let the app open —
+   *  the workspace must never be shown before its data has arrived. */
+  const unlock = useCallback(async () => {
+    try {
+      const a = await api.me();
+      if (isBlocked(a)) return false;
+      const d = await api.load();
+      setData(d); setAgency(a);
+      const raw = localStorage.getItem(LS.session);
+      localStorage.setItem(LS.session, JSON.stringify({ ...(raw ? JSON.parse(raw) : {}), agency: a }));
+      return true;
+    } catch { return false; }
+  }, []);
+
   const value = useMemo<Store>(() => ({
     lang, setLang, t, dark, toggleTheme, phase,
-    agency, worker, data, mutate, signIn, signOut, reload, refreshAgency, saving, toasts, toast,
-  }), [refreshAgency, lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
+    agency, worker, data, mutate, signIn, signOut, reload, refreshAgency, unlock, saving, toasts, toast,
+  }), [refreshAgency, unlock, lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
