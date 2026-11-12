@@ -8,7 +8,7 @@ import { SupportChat } from './SupportChat';
 import type { Key } from '@/lib/i18n';
 import {
   LayoutGrid, Film, CheckSquare, Receipt, Briefcase, Users, Settings as Cog,
-  MoreHorizontal, LogOut, Sun, Moon, Languages, X, Menu,
+  MoreHorizontal, LogOut, Sun, Moon, Languages, X, Menu, Hourglass,
 } from 'lucide-react';
 
 export type TabId = 'dashboard' | 'videos' | 'tasks' | 'invoices' | 'clients' | 'team' | 'settings';
@@ -35,6 +35,10 @@ export function Shell({ tab, setTab, children }: {
   const solo = agency?.account_type === 'solo';
   const visible = (id: TabId) => !(solo && id === 'team') && !(worker && (id === 'team' || id === 'settings' || id === 'clients'));
   const secondary = SECONDARY.filter(visible);
+
+  const trialDays = agency?.plan === 'trial' && agency.plan_expires_at && !worker
+    ? Math.max(0, Math.ceil((+new Date(agency.plan_expires_at) - Date.now()) / 86400000)) : null;
+  const trialLabel = trialDays === null ? '' : trialDays <= 1 ? t('trial_last') : t('trial_left', trialDays);
 
   const NavItem = ({ id, onClick }: { id: TabId; onClick?: () => void }) => {
     const Icon = ICON[id];
@@ -74,7 +78,18 @@ export function Shell({ tab, setTab, children }: {
           )}
         </div>
         {[...PRIMARY, ...secondary].filter(visible).map((id) => <NavItem key={id} id={id} />)}
-        <div className="mt-auto flex flex-col gap-1 border-t pt-2">
+        {trialDays !== null && (
+          <div className="mt-auto rounded-xl border p-3" style={{ background: 'var(--accent-soft)' }}>
+            <p className="flex items-center gap-1.5 text-[0.7rem] font-extrabold text-[var(--accent)]">
+              <Hourglass size={13} />{t('trial_plan')}
+            </p>
+            <p className="mt-1 text-xs font-bold">{trialLabel}</p>
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--surface)]">
+              <div className="h-full rounded-full" style={{ background: 'var(--accent)', width: `${Math.min(100, (trialDays / 14) * 100)}%` }} />
+            </div>
+          </div>
+        )}
+        <div className={cn('flex flex-col gap-1 border-t pt-2', trialDays === null ? 'mt-auto' : 'mt-2')}>
           <button onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted hover:bg-[var(--surface-2)] cursor-pointer">
             <Languages size={17} />{lang === 'ar' ? 'English' : 'العربية'}
           </button>
@@ -97,6 +112,12 @@ export function Shell({ tab, setTab, children }: {
           </div>
           <div className="flex items-center gap-1">
             {saving && <span className="text-[0.6rem] text-faint">…</span>}
+            {trialDays !== null && (
+              <span title={trialLabel} className="flex items-center gap-1 rounded-full px-2 py-1 text-[0.62rem] font-extrabold text-[var(--accent)]"
+                style={{ background: 'var(--accent-soft)' }}>
+                <Hourglass size={11} />{trialDays}
+              </span>
+            )}
             <Button size="sm" variant="ghost" onClick={() => setMore(true)} aria-label={t('menu')}>
               <Menu size={17} />
             </Button>

@@ -56,7 +56,7 @@ export type AppData = {
 
 export type Agency = {
   id: string; name: string; email: string; phone?: string;
-  plan: 'free' | 'basic' | 'pro';
+  plan: 'free' | 'trial' | 'basic' | 'pro';
   account_type: 'agency' | 'solo';
   is_active: boolean; is_super: boolean;
   plan_expires_at?: string | null; notes?: string; created_at?: string;

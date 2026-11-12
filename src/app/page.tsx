@@ -14,7 +14,9 @@ import { SuperAdmin } from '@/screens/SuperAdmin';
 import { Shell, type TabId } from '@/components/Shell';
 import { Logo } from '@/components/Logo';
 import { Card, Button, Skeleton, ListSkeleton } from '@/components/ui/primitives';
-import { Clock, Ban } from 'lucide-react';
+import { SupportChat } from '@/components/SupportChat';
+import { supportLink } from '@/lib/support';
+import { Clock, Ban, MessageCircle, RefreshCw } from 'lucide-react';
 
 export default function Page() {
   const { phase, agency } = useApp();
@@ -66,18 +68,53 @@ function ConfigError() {
 }
 
 function Blocked({ suspended }: { suspended: boolean }) {
-  const { t, signOut } = useApp();
+  const { t, signOut, agency, refreshAgency, toast } = useApp();
+  const [busy, setBusy] = useState(false);
+  const trial = agency?.plan === 'trial';
+  const title = suspended ? t('suspended') : trial ? t('trial_over') : t('sub_over');
+  const sub = suspended ? t('suspended_sub') : trial ? t('trial_over_sub') : t('sub_over_sub');
+  const href = supportLink(`${t('subscribe')} — ${agency?.email ?? ''}`);
+
+  // a payment recorded by the admin unlocks the account without a re-login
+  const recheck = async () => {
+    setBusy(true);
+    const a = await refreshAgency();
+    setBusy(false);
+    const open = a && a.is_active && !(a.plan_expires_at && new Date(a.plan_expires_at) < new Date() && a.plan !== 'free');
+    if (!open) toast(t('still_blocked'), 'err');
+  };
+
   return (
     <div className="grid min-h-dvh place-items-center px-4">
-      <Card className="flex max-w-sm flex-col items-center gap-4 p-8 text-center">
+      <Card className="fade-in flex w-full max-w-sm flex-col items-center gap-4 p-8 text-center">
         <span className="grid size-14 place-items-center rounded-2xl"
-          style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>
+          style={suspended
+            ? { background: 'var(--danger-soft)', color: 'var(--danger)' }
+            : { background: 'var(--accent-soft)', color: 'var(--accent)' }}>
           {suspended ? <Ban size={24} /> : <Clock size={24} />}
         </span>
-        <p className="text-lg font-black">{suspended ? 'Account suspended' : 'Subscription expired'}</p>
-        <p className="text-sm text-muted">WhatsApp</p>
-        <Button className="w-full" onClick={signOut}>{t('logout')}</Button>
+        <div>
+          <p className="text-lg font-black">{title}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">{sub}</p>
+        </div>
+        <div className="flex w-full flex-col gap-2">
+          {href && (
+            <a href={href} target="_blank" rel="noreferrer"
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl text-sm font-bold text-white"
+              style={{ background: 'var(--accent)' }}>
+              <MessageCircle size={16} />{suspended ? t('contact_support') : t('subscribe')}
+            </a>
+          )}
+          {!suspended && (
+            <Button className="min-h-11 w-full" loading={busy} onClick={recheck}>
+              <RefreshCw size={14} />{t('ive_paid')}
+            </Button>
+          )}
+          <Button variant="ghost" className="min-h-10 w-full" onClick={signOut}>{t('logout')}</Button>
+        </div>
       </Card>
+      {/* locked out of the app, but not out of support */}
+      <SupportChat />
     </div>
   );
 }

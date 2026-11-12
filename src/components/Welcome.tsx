@@ -71,7 +71,7 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
         <div className="mt-8 flex w-full max-w-[21rem] flex-col gap-3">
           <Button variant="primary" size="lg" onClick={onSignUp}
             className="min-h-13 !rounded-2xl text-[0.95rem] shadow-[0_10px_30px_rgba(13,124,251,.35)]">
-            {t('start_free')}
+            {t('start_trial')}
             <ArrowRight size={17} className="rtl:rotate-180" />
           </Button>
           <button onClick={onSignIn}

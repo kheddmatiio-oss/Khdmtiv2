@@ -48,7 +48,7 @@ export function SuperAdmin() {
   const stats = rows && {
     total: rows.length,
     active: rows.filter((a) => a.is_active && !expired(a)).length,
-    paying: rows.filter((a) => a.plan !== 'free').length,
+    paying: rows.filter((a) => a.plan !== 'free' && a.plan !== 'trial').length,
   };
 
   return (
@@ -106,7 +106,7 @@ export function SuperAdmin() {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <p className="truncate text-sm font-bold">{a.name}</p>
-                          <Chip tone={a.plan === 'free' ? 'neutral' : 'accent'}>{a.plan}</Chip>
+                          <Chip tone={a.plan === 'free' || a.plan === 'trial' ? 'neutral' : 'accent'}>{a.plan}</Chip>
                           {a.is_super && <Chip tone="warn"><Crown size={9} /></Chip>}
                           {!a.is_active && <Chip tone="danger"><Ban size={9} /></Chip>}
                           {exp && a.is_active && <Chip tone="danger">expired</Chip>}

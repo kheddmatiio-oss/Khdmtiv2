@@ -20,6 +20,8 @@ type Store = {
   signIn: (a: Agency, w?: Editor, d?: AppData) => void;
   signOut: () => Promise<void>;
   reload: () => Promise<void>;
+  /** Re-read plan/expiry from the server; returns the fresh account. */
+  refreshAgency: () => Promise<Agency | null>;
   saving: boolean;
   toasts: Toast[]; toast: (msg: string, tone?: 'ok' | 'err') => void;
 };
@@ -68,7 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // the cached session is only a hint — the token decides
     api.load()
-      .then((d2) => { setData(d2); setPhase('ready'); })
+      .then(async (d2) => { setData(d2); await refreshAgency(); setPhase('ready'); })
       .catch(() => {
         localStorage.removeItem(LS.session);
         setAgency(null); setWorker(null); setPhase('anon');
@@ -146,12 +148,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAgency(null); setWorker(null); setData(EMPTY_DATA); setPhase('anon');
   }, []);
 
+  const refreshAgency = useCallback(async () => {
+    try {
+      const a = await api.me();
+      setAgency(a);
+      const raw = localStorage.getItem(LS.session);
+      const s = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(LS.session, JSON.stringify({ ...s, agency: a }));
+      return a;
+    } catch { return null; }   // older database without api_me: keep the cached copy
+  }, []);
+
   const reload = useCallback(async () => { setData(await api.load()); }, []);
 
   const value = useMemo<Store>(() => ({
     lang, setLang, t, dark, toggleTheme, phase,
-    agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast,
-  }), [lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
+    agency, worker, data, mutate, signIn, signOut, reload, refreshAgency, saving, toasts, toast,
+  }), [refreshAgency, lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

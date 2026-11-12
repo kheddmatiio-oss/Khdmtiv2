@@ -38,7 +38,7 @@ export function AffiliatePanel() {
     return {
       pending: byCurrency(c.filter((x) => x.status === 'pending')),
       paid: byCurrency(c.filter((x) => x.status === 'paid')),
-      paying: (me?.referrals ?? []).filter((r) => r.plan !== 'free').length,
+      paying: (me?.referrals ?? []).filter((r) => r.plan !== 'free' && r.plan !== 'trial').length,
     };
   }, [me]);
 

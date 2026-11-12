@@ -134,6 +134,9 @@ export const api = {
   adminSupportSend: (agencyId: string, body: string) =>
     rpc<SupportMessage>('api_admin_support_send', { p_token: getToken(), p_agency: agencyId, p_body: body }),
 
+  /** Fresh account state — the cached copy goes stale when a payment lands. */
+  me: () => rpc<Agency>('api_me', { p_token: getToken() }),
+
   // affiliates
   affiliateMe: () => rpc<AffiliateMe>('api_affiliate_me', { p_token: getToken() }),
   adminAffiliates: () =>

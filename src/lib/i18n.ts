@@ -137,6 +137,19 @@ const ar = {
   payment_recorded: 'تسجّلت الدفعة ✅',
   no_affiliates: 'ما كاين حتى مسوّق جاب حد بعد',
   referred_by: 'جا من طرف',
+  // trial
+  start_trial: 'ابدأ 14 يوم مجاناً',
+  trial_badge: '14 يوم مجاناً',
+  trial_title: 'جرّب خدمتي 14 يوم كاملة، مجاناً',
+  trial_sub: 'كل المميزات مفتوحة من أول دقيقة.',
+  trial_b1: 'كل المميزات بلا استثناء', trial_b2: 'بلا بطاقة بنكية',
+  trial_b3: 'فواتير بالصيغة الجزائرية وعملات متعددة', trial_b4: 'بياناتك تبقى ليك',
+  trial_left: 'باقي {0} يوم في التجربة', trial_last: 'آخر يوم في التجربة',
+  trial_plan: 'تجربة مجانية',
+  trial_over: 'انتهت التجربة المجانية', trial_over_sub: 'بياناتك محفوظة. اشترك باش تكمّل الخدمة من وين وقفت.',
+  sub_over: 'انتهى الاشتراك', sub_over_sub: 'بياناتك محفوظة. جدّد الاشتراك باش تكمّل.',
+  suspended: 'الحساب موقوف', suspended_sub: 'تواصل معنا باش نشوفو المشكل.',
+  subscribe: 'اشترك', ive_paid: 'دفعت — حدّث', still_blocked: 'مازال ما تسجّلتش الدفعة',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -262,6 +275,18 @@ const en: Dict = {
   payment_recorded: 'Payment recorded ✅',
   no_affiliates: 'No affiliate has referred anyone yet',
   referred_by: 'Referred by',
+  start_trial: 'Start 14-day free trial',
+  trial_badge: '14 days free',
+  trial_title: 'Try Khedmti free for 14 full days',
+  trial_sub: 'Every feature unlocked from the first minute.',
+  trial_b1: 'Every feature, no exceptions', trial_b2: 'No bank card needed',
+  trial_b3: 'Algerian-format invoices, multi-currency', trial_b4: 'Your data stays yours',
+  trial_left: '{0} days left in trial', trial_last: 'Last day of trial',
+  trial_plan: 'Free trial',
+  trial_over: 'Your free trial has ended', trial_over_sub: 'Your data is safe. Subscribe to pick up where you left off.',
+  sub_over: 'Subscription expired', sub_over_sub: 'Your data is safe. Renew to continue.',
+  suspended: 'Account suspended', suspended_sub: 'Contact us so we can sort it out.',
+  subscribe: 'Subscribe', ive_paid: 'I paid — refresh', still_blocked: 'Payment not recorded yet',
 };
 
 export const DICT = { ar, en } as const;
