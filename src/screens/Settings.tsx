@@ -147,6 +147,27 @@ export function SettingsScreen() {
       {tab === 'invoice' && (
         <Section title={t('sec_invoice')}>
           <div className="flex flex-col gap-3.5 p-4">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-bold text-muted">{t('inv_template')}</span>
+              <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('inv_template')}>
+                {(['studio', 'bold', 'classic'] as const).map((id) => {
+                  const on = (I.template ?? 'studio') === id;
+                  return (
+                    <button key={id} type="button" role="radio" aria-checked={on} onClick={() => set('invoice', { template: id })}
+                      className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border p-2.5 transition-colors ${on ? 'border-[var(--accent)] bg-[var(--accent-soft)]' : 'hover:bg-[var(--surface-2)]'}`}>
+                      {/* a schematic of the page, not a screenshot */}
+                      <span aria-hidden className="flex h-[4.6rem] w-14 overflow-hidden rounded-md bg-white shadow-[0_2px_8px_rgb(0_0_0/.25)]">
+                        {id === 'studio' && <><i className="w-4 bg-[#0B111A]" /><i className="flex flex-1 flex-col gap-1 p-1.5"><b className="h-1.5 w-5 rounded-full bg-[#0B111A]" /><b className="h-px bg-[#d5dbe7]" /><b className="h-px bg-[#d5dbe7]" /><b className="h-px bg-[#d5dbe7]" /><b className="ms-auto mt-auto h-1.5 w-4 rounded-full bg-[#0D7CFB]" /></i></>}
+                        {id === 'bold' && <i className="flex flex-1 flex-col gap-1 p-1.5"><b className="h-5 rounded-[5px] bg-[#0D7CFB]" /><b className="h-1.5 rounded-full bg-[#eef1f6]" /><b className="h-1.5 rounded-full bg-[#eef1f6]" /><b className="h-1.5 rounded-full bg-[#eef1f6]" /><b className="mt-auto h-2.5 rounded-[4px] bg-[#eef1f6]" /></i>}
+                        {id === 'classic' && <i className="flex flex-1 flex-col gap-1"><b className="h-1 bg-[#0B111A]" /><i className="flex flex-1 flex-col gap-1 px-1.5 pb-1.5"><b className="h-1.5 w-5 rounded-full bg-[#0B111A]" /><b className="h-2 rounded-[2px] bg-[#0B111A]" /><b className="h-px bg-[#d5dbe7]" /><b className="h-px bg-[#d5dbe7]" /><b className="ms-auto mt-auto h-2 w-6 rounded-[2px] bg-[#0B111A]" /></i></i>}
+                      </span>
+                      <span className={`text-xs font-bold ${on ? 'text-[var(--accent)]' : ''}`}>{t(`tpl_${id}` as never)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="text-[0.68rem] text-faint">{t('inv_template_hint')}</span>
+            </div>
             <Field label={t('invoice_lang')} hint={t('invoice_lang_hint')}>
               <Select value={I.lang} onChange={(e) => set('invoice', { lang: e.target.value as S['invoice']['lang'] })}>
                 <option value="fr">Français</option>

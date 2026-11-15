@@ -50,7 +50,7 @@ export type Settings = {
     name: string; logo: string; email: string; phone: string;
     address: string; nif: string; nis: string; rc: string; art: string; rip: string;
   };
-  invoice: { vat: number; paymentMode: string; object: string; prefix: string; lang: 'ar' | 'en' | 'fr' };
+  invoice: { vat: number; paymentMode: string; object: string; prefix: string; lang: 'ar' | 'en' | 'fr'; template?: 'studio' | 'bold' | 'classic' };
   currency: { base: Currency; list: { code: Currency; rate: number }[] };
   theme: { accent: string };
   onboarding: { dismissed: boolean };

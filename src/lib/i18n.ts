@@ -193,6 +193,8 @@ const ar = {
   lp_hero_sub: 'مساحة الخدمة تاع الإيديتور: تتبّع كل فيديو من الطلب حتى التسليم، وفوترو بالصيغة الجزائرية بضغطة.',
   lp_nav_features: 'المميزات', lp_nav_price: 'السعر', lp_made: 'مصنوعة للإيديتورز في الجزائر',
   lp_mock_due: 'يتسلّم غدوة', lp_mock_rev: 'المداخيل',
+  inv_template: 'قالب الفاتورة', tpl_studio: 'ستوديو', tpl_bold: 'جريء', tpl_classic: 'كلاسيكي',
+  inv_template_hint: 'اختار الشكل اللي يخرج بيه PDF. تقدر تبدّلو من معاينة الفاتورة زادة.',
 } as const;
 
 type Dict = Record<keyof typeof ar, string>;
@@ -370,6 +372,8 @@ const en: Dict = {
   lp_hero_sub: 'The workspace for video editors: follow every video from brief to delivery, then invoice it in the Algerian format in one tap.',
   lp_nav_features: 'Features', lp_nav_price: 'Pricing', lp_made: 'Made for video editors in Algeria',
   lp_mock_due: 'Due tomorrow', lp_mock_rev: 'Revenue',
+  inv_template: 'Invoice template', tpl_studio: 'Studio', tpl_bold: 'Bold', tpl_classic: 'Classic',
+  inv_template_hint: 'The look of the printed PDF. You can also switch it from the invoice preview.',
 };
 
 export const DICT = { ar, en } as const;
