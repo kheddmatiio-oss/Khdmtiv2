@@ -2,31 +2,30 @@
 import { useEffect, useRef } from 'react';
 import { useApp } from '@/lib/store';
 import { Button } from './ui/primitives';
-import { priceLabel } from '@/lib/pricing';
-import { supportLink } from '@/lib/support';
+import { priceLabel, wasLabel, type PlanKind } from '@/lib/pricing';
+import { supportLink, instagramLink, emailLink, upgradeLink, upgradeChannel, INSTAGRAM, EMAIL } from '@/lib/support';
 import { STAGES, STAGE_LABEL } from '@/lib/pipeline';
 import type { Key } from '@/lib/i18n';
-import {
-  Columns3, CalendarClock, Receipt, Wallet, Tags, TrendingUp, Users, Check, ArrowRight,
-  Gift, MessageCircle, UserPlus, Film, FileText,
-} from 'lucide-react';
+import { Check, ArrowRight, Plus } from 'lucide-react';
 
-const FEATURES: { icon: typeof Receipt; title: Key; sub: Key }[] = [
-  { icon: Columns3, title: 'lp_f1', sub: 'lp_f1s' },
-  { icon: CalendarClock, title: 'lp_f2', sub: 'lp_f2s' },
-  { icon: Receipt, title: 'lp_f3', sub: 'lp_f3s' },
-  { icon: Wallet, title: 'lp_f4', sub: 'lp_f4s' },
-  { icon: Tags, title: 'lp_f5', sub: 'lp_f5s' },
-  { icon: Users, title: 'lp_f6', sub: 'lp_f6s' },
+const FEATURES: { title: Key; sub: Key }[] = [
+  { title: 'lp_f1', sub: 'lp_f1s' }, { title: 'lp_f2', sub: 'lp_f2s' }, { title: 'lp_f3', sub: 'lp_f3s' },
+  { title: 'lp_f4', sub: 'lp_f4s' }, { title: 'lp_f5', sub: 'lp_f5s' }, { title: 'lp_f6', sub: 'lp_f6s' },
 ];
 
-const STEPS: { icon: typeof Receipt; title: Key; sub: Key }[] = [
-  { icon: UserPlus, title: 'lp_s1', sub: 'lp_s1s' },
-  { icon: Film, title: 'lp_s2', sub: 'lp_s2s' },
-  { icon: FileText, title: 'lp_s3', sub: 'lp_s3s' },
+const STEPS: { title: Key; sub: Key }[] = [
+  { title: 'lp_s1', sub: 'lp_s1s' }, { title: 'lp_s2', sub: 'lp_s2s' }, { title: 'lp_s3', sub: 'lp_s3s' },
 ];
 
-const PLAN: Key[] = ['lp_p1', 'lp_p2', 'lp_p3', 'lp_p4', 'lp_p5', 'lp_p6'];
+const PLANS: { kind: PlanKind; name: Key; sub: Key; points: Key[] }[] = [
+  { kind: 'solo', name: 'lp_plan_solo', sub: 'lp_plan_solo_s', points: ['lp_p1', 'lp_p2', 'lp_p3', 'lp_p4', 'lp_p6'] },
+  { kind: 'agency', name: 'lp_plan_agency', sub: 'lp_plan_agency_s', points: ['lp_pa1', 'lp_pa2', 'lp_pa3', 'lp_pa4'] },
+];
+
+const FAQ: [Key, Key][] = [
+  ['faq_q1', upgradeChannel === 'instagram' ? 'faq_a1_ig' : 'faq_a1_wa'],
+  ['faq_q2', 'faq_a2'], ['faq_q3', 'faq_a3'], ['faq_q4', 'faq_a4'],
+];
 
 /** Illustrative cards for the product preview — clearly an example, not data. */
 const DEMO: Record<string, { title: string; price: string; due?: Key; late?: boolean; rev?: number }[]> = {
@@ -79,14 +78,18 @@ function Art({ kind }: { kind: number }) {
     <div dir="ltr" className="rounded-xl bg-white p-3 text-[#0B111A]">
       <div className="flex items-center justify-between">
         <span className="text-[0.7rem] font-extrabold tracking-wide text-[#0D7CFB]">FACTURE</span>
-        <span className="tnum text-[0.56rem] font-bold text-[#5c6478]">NIF · NIS · RC · RIP</span>
+        <span className="tnum text-[0.56rem] font-bold text-[#5c6478]">F-0042</span>
       </div>
-      <div className="mt-2 rounded-md border border-dashed border-[#D5DBE7] bg-[#F6F8FB] px-2 py-1.5">
-        <p className="text-[0.5rem] font-bold text-[#5c6478]">Arrêtée la présente facture à la somme de :</p>
-        <p className="text-[0.62rem] font-extrabold">Vingt-six mille dinars algériens</p>
+      <div className="mt-2.5 space-y-1.5">
+        {[72, 58].map((w) => (
+          <div key={w} className="flex items-center gap-2">
+            <span className="h-1.5 rounded-full bg-[#E3E7EF]" style={{ width: `${w}%` }} />
+            <span className="ms-auto h-1.5 w-8 rounded-full bg-[#CBD3E1]" />
+          </div>
+        ))}
       </div>
       <div className="tnum mt-2 flex items-center justify-between rounded-md bg-[#0B111A] px-2.5 py-1.5 text-white">
-        <span className="text-[0.5rem] font-bold tracking-widest text-white/70">TOTAL TTC</span>
+        <span className="text-[0.5rem] font-bold tracking-widest text-white/70">TOTAL</span>
         <span className="text-[0.7rem] font-extrabold">26,000 DA</span>
       </div>
     </div>
@@ -137,6 +140,7 @@ const H2 = ({ kicker, title, sub }: { kicker: string; title: string; sub?: strin
 export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
   const { t, lang } = useApp();
   const wa = supportLink('Khedmti');
+  const pay = upgradeLink('Khedmti');
 
   return (
     <div className="relative text-white" style={{ background: '#05080F' }}>
@@ -191,7 +195,7 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
       <section id="features" className="scroll-mt-16 border-t border-white/8 px-4 py-20 md:px-8 md:py-28">
         <Reveal><H2 kicker={t('lp_k_features')} title={t('lp_features')} /></Reveal>
         <ul className="mx-auto mt-12 grid max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          {FEATURES.map(({ icon: Icon, title, sub }, n) => (
+          {FEATURES.map(({ title, sub }, n) => (
             <li key={title} className={SPAN[n]}>
               <Reveal delay={(n % 3) * 80} className="h-full">
                 <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/8 p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(13,124,251,.5)]"
@@ -199,9 +203,7 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
                   <span aria-hidden className="pointer-events-none absolute -end-16 -top-16 size-44 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
                     style={{ background: 'rgba(13,124,251,.35)' }} />
                   <div aria-hidden className="relative mb-6 flex min-h-[5.5rem] flex-col justify-center"><Art kind={n} /></div>
-                  <h3 className="relative flex items-center gap-2 text-[1.05rem] font-extrabold">
-                    <Icon size={17} className="shrink-0 text-[#7DB8FF]" />{t(title)}
-                  </h3>
+                  <h3 className="relative text-[1.05rem] font-extrabold">{t(title)}</h3>
                   <p className="relative mt-1.5 text-[0.84rem] leading-relaxed text-white/55">{t(sub)}</p>
                 </div>
               </Reveal>
@@ -214,10 +216,9 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
       <section className="border-t border-white/8 px-4 py-20 md:px-8 md:py-28">
         <Reveal><H2 kicker={t('lp_k_steps')} title={t('lp_steps')} /></Reveal>
         <ol className="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-3">
-          {STEPS.map(({ icon: Icon, title, sub }, n) => (
-            <li key={title} className="relative rounded-2xl border border-white/8 p-6" style={{ background: 'linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.01))' }}>
-              <span className="tnum absolute end-5 top-4 text-5xl font-black leading-none text-white/[.06]">{n + 1}</span>
-              <Icon size={22} className="text-[#7DB8FF]" />
+          {STEPS.map(({ title, sub }, n) => (
+            <li key={title} className="relative border-t-2 border-white/10 pt-5 md:pe-6">
+              <span className="tnum text-[2.6rem] font-extrabold leading-none text-[#5FA8FF]">0{n + 1}</span>
               <h3 className="mt-4 text-base font-extrabold">{t(title)}</h3>
               <p className="mt-1.5 text-[0.82rem] leading-relaxed text-white/55">{t(sub)}</p>
             </li>
@@ -228,36 +229,66 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
       {/* ── price ──────────────────────────────────────────── */}
       <section id="pricing" className="scroll-mt-16 border-t border-white/8 px-4 py-20 md:px-8 md:py-28">
         <Reveal><H2 kicker={t('lp_k_price')} title={t('lp_price')} sub={t('lp_price_sub')} /></Reveal>
-        <div className="relative mx-auto mt-10 max-w-md">
-          <div aria-hidden className="pointer-events-none absolute -inset-6 rounded-[3rem] opacity-70 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(13,124,251,.25), transparent 70%)' }} />
-          <div className="relative overflow-hidden rounded-3xl border p-7 md:p-8"
-            style={{ borderColor: 'rgba(13,124,251,.45)', background: 'linear-gradient(165deg, #0F1C33 0%, #0B111A 60%)' }}>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.68rem] font-extrabold"
-              style={{ background: 'rgba(13,124,251,.22)', color: '#8CC2FF' }}>
-              <Gift size={12} />{t('trial_badge')}
-            </span>
-            <p className="mt-5 flex items-baseline gap-2">
-              <span className="tnum text-5xl font-black tracking-tight">{priceLabel(lang)}</span>
-              <span className="text-sm font-bold text-white/50">/ {t('lp_month')}</span>
-            </p>
-            <p className="mt-2 text-[0.8rem] text-white/55">{t('lp_price_note')}</p>
-            <ul className="mt-6 flex flex-col gap-3">
-              {PLAN.map((k) => (
-                <li key={k} className="flex items-center gap-2.5 text-sm font-bold text-white/90">
-                  <span className="grid size-5 shrink-0 place-items-center rounded-full" style={{ background: '#0D7CFB' }}>
-                    <Check size={12} strokeWidth={3} />
-                  </span>
-                  {t(k)}
-                </li>
-              ))}
-            </ul>
-            <Button variant="primary" size="lg" onClick={onSignUp}
-              className="mt-7 min-h-13 w-full !rounded-2xl shadow-[0_10px_30px_rgba(13,124,251,.35)]">
-              {t('start_trial')}<ArrowRight size={17} className="rtl:rotate-180" />
-            </Button>
-            <p className="mt-3 text-center text-[0.7rem] text-white/45">{t('trial_b2')}</p>
-          </div>
+        <div className="relative mx-auto mt-10 grid max-w-3xl gap-4 md:grid-cols-2">
+          {PLANS.map(({ kind, name, sub, points }) => {
+            const main = kind === 'solo';
+            return (
+              <div key={kind} className="relative flex flex-col overflow-hidden rounded-3xl border p-7"
+                style={main
+                  ? { borderColor: 'rgba(13,124,251,.5)', background: 'linear-gradient(165deg, #0F1C33 0%, #0B111A 60%)' }
+                  : { borderColor: 'rgba(255,255,255,.1)', background: 'rgba(255,255,255,.025)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-extrabold">{t(name)}</h3>
+                    <p className="mt-0.5 text-[0.78rem] text-white/55">{t(sub)}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full px-2.5 py-1 text-[0.64rem] font-extrabold"
+                    style={{ background: 'rgba(13,124,251,.22)', color: '#8CC2FF' }}>{t('lp_launch')}</span>
+                </div>
+                <p className="tnum mt-6 text-base font-bold text-white/40"><s>{wasLabel(lang, kind)}</s></p>
+                <p className="mt-1 flex items-baseline gap-2">
+                  <span className="tnum text-[2.6rem] font-black leading-none tracking-tight">{priceLabel(lang, kind)}</span>
+                  <span className="text-sm font-bold text-white/50">/ {t('lp_month')}</span>
+                </p>
+                <ul className="mt-6 flex flex-1 flex-col gap-3">
+                  {points.map((k) => (
+                    <li key={k} className="flex items-start gap-2.5 text-sm font-semibold text-white/85">
+                      <Check size={15} strokeWidth={3} className="mt-0.5 shrink-0 text-[#5FA8FF]" />{t(k)}
+                    </li>
+                  ))}
+                </ul>
+                <Button variant={main ? 'primary' : 'secondary'} size="lg" onClick={onSignUp} className="mt-7 min-h-13 w-full !rounded-2xl">
+                  {t('start_trial')}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+        <p className="mt-5 text-center text-[0.78rem] text-white/50">{t('lp_price_note')} {t('trial_b2')}.</p>
+      </section>
+
+      {/* ── questions ──────────────────────────────────────── */}
+      <section id="faq" className="scroll-mt-16 border-t border-white/8 px-4 py-20 md:px-8 md:py-28">
+        <Reveal><H2 kicker={t('faq_k')} title={t('faq_title')} /></Reveal>
+        <div className="mx-auto mt-10 max-w-2xl border-t border-white/10">
+          {FAQ.map(([qk, ak], n) => (
+            <details key={qk} className="group border-b border-white/10">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[0.98rem] font-bold text-white/90 [&::-webkit-details-marker]:hidden">
+                {t(qk)}
+                <Plus size={17} className="shrink-0 text-white/45 transition-transform group-open:rotate-45" />
+              </summary>
+              <div className="pb-5 text-sm leading-relaxed text-white/60">
+                <p>{t(ak)}</p>
+                {n === 0 && pay && (
+                  <a href={pay} target="_blank" rel="noreferrer"
+                    className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-bold text-white hover:bg-white/[.06]">
+                    {INSTAGRAM ? <span dir="ltr">@{INSTAGRAM}</span> : 'WhatsApp'}
+                    <ArrowRight size={15} className="rtl:rotate-180" />
+                  </a>
+                )}
+              </div>
+            </details>
+          ))}
         </div>
       </section>
 
@@ -265,8 +296,7 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
       <section className="border-t border-white/8 px-4 py-20 md:px-8 md:py-24">
         <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
           <div className="rounded-3xl border border-white/8 bg-white/[.025] p-7">
-            <TrendingUp size={22} className="text-[#7DB8FF]" />
-            <h3 className="mt-4 text-xl font-black">{t('lp_aff')}</h3>
+            <h3 className="text-xl font-black">{t('lp_aff')}</h3>
             <p className="mt-2 text-sm leading-relaxed text-white/55">{t('lp_aff_sub')}</p>
           </div>
           <div className="flex flex-col justify-between gap-6 rounded-3xl p-7"
@@ -286,12 +316,13 @@ export function LandingSections({ onSignUp }: { onSignUp: () => void }) {
       <footer className="border-t border-white/8 px-4 py-8 md:px-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 text-[0.74rem] text-white/45">
           <span>© {new Date().getFullYear()} {t('app')}</span>
-          {wa && (
-            <a href={wa} target="_blank" rel="noreferrer"
-              className="flex min-h-11 items-center gap-1.5 font-bold text-white/70 hover:text-white">
-              <MessageCircle size={14} />{t('contact_support')}
-            </a>
-          )}
+          <span className="flex flex-wrap items-center gap-x-5 font-bold text-white/70">
+            {instagramLink && <a href={instagramLink} target="_blank" rel="noreferrer" className="flex min-h-11 items-center hover:text-white">Instagram</a>}
+            {emailLink && <a href={emailLink} dir="ltr" className="flex min-h-11 items-center hover:text-white">{EMAIL}</a>}
+            {!instagramLink && !emailLink && wa && (
+              <a href={wa} target="_blank" rel="noreferrer" className="flex min-h-11 items-center hover:text-white">{t('contact_support')}</a>
+            )}
+          </span>
         </div>
       </footer>
     </div>

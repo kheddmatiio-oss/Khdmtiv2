@@ -13,6 +13,8 @@ export type Ctx = {
   t: (k: string) => string; L: 'ar' | 'en' | 'fr'; rtl: boolean;
   start: 'left' | 'right'; end: 'left' | 'right';
   paid: boolean; object: string; payMode: string;
+  /** "TOTAL TTC" when VAT applies, plain "TOTAL" when it does not. */
+  totalLabel: string;
   seller: string[][]; buyer: (string | undefined)[][];
   meta: [string, string][];
   cols: [string, 'left' | 'right' | 'center', string][];

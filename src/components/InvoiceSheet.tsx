@@ -23,9 +23,8 @@ const FR: Record<string, string> = {
   invoice_no: 'Facture n°', period: 'Période', issue_date: "Date d'émission",
   due_date: 'Échéance', ref: 'Réf', designation: 'Désignation', qty: 'Qté',
   unit_price: 'P.U.', amount: 'Montant', subtotal_ht: 'Total HT', vat: 'TVA',
-  total_ttc: 'TOTAL TTC', discount: 'Remise', object: 'Objet',
+  total_ttc: 'TOTAL TTC', total_plain: 'TOTAL', discount: 'Remise', object: 'Objet',
   payment_mode: 'Mode de paiement',
-  amount_words: 'Arrêtée la présente facture à la somme de',
   signature: 'Cachet et signature', paid_stamp: 'PAYÉE', gross_total: 'Total brut',
 };
 
@@ -69,12 +68,13 @@ export function InvoiceSheet({ invoice, onClose }: { invoice: Invoice; onClose: 
   const object = invoice.object || st.invoice.object || '';
   const payMode = invoice.paymentMode || st.invoice.paymentMode || '';
   // tints are mixed from the chosen colour, so any accent stays coherent
+  const totalLabel = invoice.vat > 0 ? t('total_ttc') : t('total_plain').toUpperCase();
   const tint = `color-mix(in oklab, ${ink} 7%, #fff)`;
   const meta: [string, string][] = [
     [t('issue_date'), fmtDate(invoice.date)],
     ...(invoice.due ? [[t('due_date'), fmtDate(invoice.due)] as [string, string]] : []),
     ...(invoice.period ? [[t('period'), invoice.period] as [string, string]] : []),
-    [t('total_ttc'), money(ttc, invoice.currency, L)],
+    [totalLabel, money(ttc, invoice.currency, L)],
   ];
   const cols: [string, 'left' | 'right' | 'center', string][] = [
     [t('ref'), start, '3rem'], [t('designation'), start, ''],
@@ -84,7 +84,7 @@ export function InvoiceSheet({ invoice, onClose }: { invoice: Invoice; onClose: 
   const tpl: TemplateId = st.invoice.template ?? 'studio';
   const ctx: Ctx = {
     invoice, client, C, lines, gross, ht, vat, ttc, ink, onInk: readableOn(ink), tint,
-    t, L, rtl, start, end, paid, object, payMode, seller, buyer, meta, cols,
+    t, L, rtl, start, end, paid, object, payMode, totalLabel, seller, buyer, meta, cols,
   };
   const pickTemplate = (id: TemplateId) =>
     mutate((d) => ({ ...d, settings: { ...d.settings, invoice: { ...d.settings.invoice, template: id } } }));

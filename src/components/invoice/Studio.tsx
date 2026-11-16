@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { fmtNumber, money } from '@/lib/money';
 import { fmtDate } from '@/lib/utils';
-import { amountInWords } from '@/lib/words';
 import { MUTED, FAINT, LINE, type Ctx } from './shared';
 
 /** A full-height colour column carries the sender; the page itself stays
  *  white and airy, with the total set as the largest thing on it. */
 export function Studio(x: Ctx) {
   const { C, ink, onInk, end, start, rtl, t, invoice, paid, seller, buyer, client, object, cols,
-    lines, L, ttc, payMode, gross, ht, vat } = x;
+    lines, L, ttc, payMode, gross, ht, vat, totalLabel } = x;
   const dim = onInk === '#fff' ? 'rgba(255,255,255,.62)' : 'rgba(11,17,26,.6)';
   const rule = onInk === '#fff' ? 'rgba(255,255,255,.16)' : 'rgba(11,17,26,.14)';
   const caps = { letterSpacing: rtl ? 0 : '0.16em' } as const;
@@ -143,20 +142,15 @@ export function Studio(x: Ctx) {
                 <Line label={t('discount')} value={`− ${fmtNumber(invoice.discount)}`} />
               </>
             )}
-            <Line label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} />
-            <Line label={`${t('vat')}${invoice.vat > 0 ? ` (${invoice.vat}%)` : ''}`} value={money(vat, invoice.currency, L)} />
+            {(invoice.vat > 0 || invoice.discount > 0) && <Line label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} />}
+            {invoice.vat > 0 && <Line label={`${t('vat')} (${invoice.vat}%)`} value={money(vat, invoice.currency, L)} />}
             <div className="mt-2 pt-3" style={{ borderTop: `2px solid ${ink}`, textAlign: end }}>
-              <p className="text-[0.56rem] font-extrabold uppercase" style={{ color: FAINT, ...caps }}>{t('total_ttc')}</p>
+              <p className="text-[0.56rem] font-extrabold uppercase" style={{ color: FAINT, ...caps }}>{totalLabel}</p>
               <p className="mt-0.5 text-[2rem] font-extrabold leading-none" style={{ color: ink === '#0B111A' ? '#0B111A' : ink, letterSpacing: '-0.02em' }}>
                 {money(ttc, invoice.currency, L)}
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="inv-keep mt-6 py-1" style={{ borderInlineStart: `3px solid ${ink}`, paddingInlineStart: 14 }}>
-          <p className="text-[0.62rem] font-semibold" style={{ color: MUTED }}>{t('amount_words')} :</p>
-          <p className="mt-0.5 text-[0.86rem] font-extrabold leading-snug">{amountInWords(ttc, invoice.currency, L)}</p>
         </div>
 
         {invoice.notes && <p className="inv-keep mt-4 whitespace-pre-wrap text-[0.72rem] leading-relaxed" style={{ color: MUTED }}>{invoice.notes}</p>}

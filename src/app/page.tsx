@@ -16,9 +16,8 @@ import { Logo } from '@/components/Logo';
 import { Card, Button, Skeleton, ListSkeleton } from '@/components/ui/primitives';
 import { SupportChat } from '@/components/SupportChat';
 import { supportLink } from '@/lib/support';
-import { priceLabel } from '@/lib/pricing';
-import { isBlocked } from '@/lib/utils';
-import { Clock, Ban, MessageCircle, RefreshCw } from 'lucide-react';
+import { isSuspended } from '@/lib/utils';
+import { Ban, MessageCircle } from 'lucide-react';
 
 export default function Page() {
   const { phase, agency } = useApp();
@@ -29,7 +28,7 @@ export default function Page() {
   if (phase === 'anon') return <Auth />;
   if (agency?.is_super) return <SuperAdmin />;
 
-  if (isBlocked(agency)) return <Blocked suspended={!agency!.is_active} />;
+  if (isSuspended(agency)) return <Blocked />;
 
   return (
     <Shell tab={tab} setTab={setTab}>
@@ -67,50 +66,29 @@ function ConfigError() {
   );
 }
 
-function Blocked({ suspended }: { suspended: boolean }) {
-  const { t, lang, signOut, agency, unlock, toast } = useApp();
-  const [busy, setBusy] = useState(false);
-  const trial = agency?.plan === 'trial';
-  const title = suspended ? t('suspended') : trial ? t('trial_over') : t('sub_over');
-  const sub = suspended ? t('suspended_sub') : trial ? t('trial_over_sub') : t('sub_over_sub');
-  const href = supportLink(`${t('subscribe')} — ${agency?.email ?? ''}`);
-
-  // a payment recorded by the admin unlocks the account without a re-login
-  const recheck = async () => {
-    setBusy(true);
-    const ok = await unlock();
-    if (!ok) { toast(t('still_blocked'), 'err'); setBusy(false); }
-  };
-
+/** Suspended by the admin. An ended trial or subscription does not land
+ *  here — it opens the workspace read-only (see Shell). */
+function Blocked() {
+  const { t, signOut, agency } = useApp();
+  const href = supportLink(`${t('contact_support')} — ${agency?.email ?? ''}`);
   return (
     <div className="grid min-h-dvh place-items-center px-4">
       <Card className="fade-in flex w-full max-w-sm flex-col items-center gap-4 p-8 text-center">
         <span className="grid size-14 place-items-center rounded-2xl"
-          style={suspended
-            ? { background: 'var(--danger-soft)', color: 'var(--danger)' }
-            : { background: 'var(--accent-soft)', color: 'var(--accent)' }}>
-          {suspended ? <Ban size={24} /> : <Clock size={24} />}
+          style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>
+          <Ban size={24} />
         </span>
         <div>
-          <p className="text-lg font-black">{title}</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted">{sub}</p>
-          {!suspended && (
-            <p className="tnum mt-3 inline-block rounded-xl px-3 py-2 text-sm font-black text-[var(--accent)]"
-              style={{ background: 'var(--accent-soft)' }}>{t('price_month', priceLabel(lang))}</p>
-          )}
+          <p className="text-lg font-black">{t('suspended')}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">{t('suspended_sub')}</p>
         </div>
         <div className="flex w-full flex-col gap-2">
           {href && (
             <a href={href} target="_blank" rel="noreferrer"
               className="flex min-h-12 items-center justify-center gap-2 rounded-xl text-sm font-bold text-white"
               style={{ background: 'var(--accent)' }}>
-              <MessageCircle size={16} />{suspended ? t('contact_support') : t('subscribe')}
+              <MessageCircle size={16} />{t('contact_support')}
             </a>
-          )}
-          {!suspended && (
-            <Button className="min-h-11 w-full" loading={busy} onClick={recheck}>
-              <RefreshCw size={14} />{t('ive_paid')}
-            </Button>
           )}
           <Button variant="ghost" className="min-h-10 w-full" onClick={signOut}>{t('logout')}</Button>
         </div>

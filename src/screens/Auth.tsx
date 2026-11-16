@@ -7,7 +7,7 @@ import { Welcome } from '@/components/Welcome';
 import { Button, Card, Field, Input } from '@/components/ui/primitives';
 import { cn } from '@/lib/cn';
 import { supportLink } from '@/lib/support';
-import { priceLabel } from '@/lib/pricing';
+import { priceLabel, wasLabel } from '@/lib/pricing';
 import type { Key } from '@/lib/i18n';
 import {
   Building2, User, Mail, Lock, Phone, ArrowLeft, Languages, Sun, Moon,
@@ -75,7 +75,7 @@ function TrialPanel() {
         <h1 className="mt-3 text-lg font-black leading-snug md:text-2xl">{t('trial_title')}</h1>
         <p className="mt-1.5 text-xs leading-relaxed text-white/60 md:text-sm">{t('trial_sub')}</p>
         <p className="tnum mt-3 inline-block rounded-lg px-2.5 py-1.5 text-xs font-extrabold text-white/90"
-          style={{ background: 'rgba(255,255,255,.08)' }}>{t('then_price', priceLabel(lang))}</p>
+          style={{ background: 'rgba(255,255,255,.08)' }}><s className="font-bold text-white/45">{wasLabel(lang)}</s> {t('then_price', priceLabel(lang))}</p>
       </div>
       <ul className="relative mt-4 hidden flex-col gap-3 md:flex">
         {points.map((k) => (

@@ -22,7 +22,9 @@ const niceMax = (n: number) => {
   return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
 };
 
-/** Six months of logged work, split into what was paid and what is still owed.
+/** Logged work by month, split into what was paid and what is still owed.
+ *  Starts at the first month that has any work and grows to six, so a new
+ *  account is not shown a row of empty months.
  *  One currency at a time: amounts in different currencies are never added. */
 export function RevenueChart({ videos, base }: { videos: Video[]; base: Currency }) {
   const { t, lang } = useApp();
@@ -46,21 +48,25 @@ export function RevenueChart({ videos, base }: { videos: Video[]; base: Currency
       });
     }
     const at = new Map(out.map((b) => [b.key, b]));
+    let first = out[out.length - 1].key;
     videos.forEach((v) => {
+      const key = v.date.slice(0, 7);
+      if (at.has(key) && key < first) first = key;   // any currency: the span must not jump when switching
       if ((v.currency ?? base) !== cur) return;
-      const b = at.get(v.date.slice(0, 7));
+      const b = at.get(key);
       if (b) b[v.paid ? 'paid' : 'unpaid'] += Number(v.price) || 0;
     });
-    return out;
+    return out.filter((b) => b.key >= first);
   }, [videos, base, cur, lang]);
 
   const [hover, setHover] = useState<number | null>(null);
   const top = niceMax(Math.max(...buckets.map((b) => b.paid + b.unpaid)));
-  const last = buckets[MONTHS - 1], prev = buckets[MONTHS - 2];
-  const lastTotal = last.paid + last.unpaid, prevTotal = prev.paid + prev.unpaid;
+  const N = buckets.length;
+  const last = buckets[N - 1], prev = N > 1 ? buckets[N - 2] : null;
+  const lastTotal = last.paid + last.unpaid, prevTotal = prev ? prev.paid + prev.unpaid : 0;
   const delta = prevTotal > 0 ? Math.round(((lastTotal - prevTotal) / prevTotal) * 100) : null;
   const empty = buckets.every((b) => b.paid + b.unpaid === 0);
-  const shown = hover ?? MONTHS - 1;
+  const shown = Math.min(hover ?? N - 1, N - 1);
 
   return (
     <Card className="overflow-hidden p-4">
@@ -126,15 +132,15 @@ export function RevenueChart({ videos, base }: { videos: Video[]; base: Currency
                     aria-label={`${b.label}: ${t('paid')} ${money(b.paid, cur, lang)}, ${t('unpaid')} ${money(b.unpaid, cur, lang)}`}
                     className="group relative flex h-full flex-1 cursor-default flex-col items-center justify-end gap-[2px] outline-none"
                     style={{ background: on ? 'color-mix(in oklab, var(--surface-2) 70%, transparent)' : undefined }}>
-                    {total > 0 && (i === MONTHS - 1 || on) && (
+                    {total > 0 && (i === N - 1 || on) && (
                       <span className="tnum mb-1 text-[0.62rem] font-extrabold">{compact(total)}</span>
                     )}
                     {b.unpaid > 0 && (
-                      <span className="w-[46%] max-w-9 transition-[height] duration-500"
+                      <span className="w-[46%] max-w-12 transition-[height] duration-500"
                         style={{ height: Math.max(2, hUnpaid), background: 'var(--chart-pending)', borderRadius: '4px 4px 0 0' }} />
                     )}
                     {b.paid > 0 && (
-                      <span className="w-[46%] max-w-9 transition-[height] duration-500"
+                      <span className="w-[46%] max-w-12 transition-[height] duration-500"
                         style={{ height: Math.max(2, hPaid), background: 'var(--accent)', borderRadius: b.unpaid > 0 ? 0 : '4px 4px 0 0' }} />
                     )}
                     <span className="pointer-events-none absolute inset-0 rounded-md group-focus-visible:shadow-[inset_0_0_0_2px_var(--accent)]" />

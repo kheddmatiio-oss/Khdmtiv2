@@ -8,7 +8,7 @@ import { totals, nextNumber, unbilledFor, liveLines } from '@/lib/invoice';
 import { money, showMap, fmtNumber, type CurrencyMap } from '@/lib/money';
 import { uid, today, fmtDate, isPast } from '@/lib/utils';
 import type { Invoice, InvoiceLine, InvoiceStatus, Currency } from '@/lib/types';
-import { Receipt, Pencil, Trash2, Plus, Printer, Check, Send } from 'lucide-react';
+import { Receipt, Pencil, Trash2, Plus, Printer, Check, Send, Undo2 } from 'lucide-react';
 
 const STATUS: InvoiceStatus[] = ['draft', 'sent', 'paid'];
 
@@ -127,6 +127,9 @@ export function Invoices() {
                     <Button size="sm" onClick={() => setViewing(inv)}><Printer size={12} />{t('print')}</Button>
                     {inv.status === 'draft' && (
                       <Button size="sm" onClick={() => setStatus(inv, 'sent')}><Send size={12} />{t('sent')}</Button>
+                    )}
+                    {inv.status === 'sent' && (
+                      <Button size="sm" onClick={() => setStatus(inv, 'draft')}><Undo2 size={12} />{t('back_to_draft')}</Button>
                     )}
                     {inv.status !== 'paid' && (
                       <Button size="sm" onClick={() => markPaid(inv)}
@@ -278,30 +281,18 @@ function InvoiceForm({ initial, onClose, onSave }: {
             <Input type="number" step="any" inputMode="decimal" className="tnum"
               value={f.discount || ''} onChange={(e) => setF({ ...f, discount: Number(e.target.value) })} />
           </Field>
-          <Field label={t('vat_rate')}>
-            <Input type="number" step="any" inputMode="decimal" className="tnum"
-              value={f.vat || ''} onChange={(e) => setF({ ...f, vat: Number(e.target.value) })} />
-          </Field>
         </div>
-        <Field label={t('period')}>
-          <Input value={f.period ?? ''} onChange={(e) => setF({ ...f, period: e.target.value })}
-            placeholder={lang === 'ar' ? 'سبتمبر 2026' : 'September 2026'} />
-        </Field>
         <Field label={t('object')}>
           <Input value={f.object ?? ''} onChange={(e) => setF({ ...f, object: e.target.value })} />
         </Field>
-        <Field label={t('payment_mode')}>
-          <Input value={f.paymentMode ?? ''} onChange={(e) => setF({ ...f, paymentMode: e.target.value })} />
-        </Field>
-
         <div className="rounded-xl border bg-[var(--surface-2)] p-3.5">
-          {[[t('subtotal_ht'), ht], [`${t('vat')}${f.vat > 0 ? ` (${f.vat}%)` : ''}`, vat]].map(([k, v]) => (
+          {(f.vat > 0 ? [[t('subtotal_ht'), ht], [`${t('vat')} (${f.vat}%)`, vat]] : []).map(([k, v]) => (
             <div key={k as string} className="mb-1 flex justify-between text-xs text-muted">
               <span>{k}</span><span className="tnum">{money(v as number, f.currency, lang)}</span>
             </div>
           ))}
-          <div className="flex justify-between border-t pt-1.5 font-black">
-            <span>{t('total_ttc')}</span>
+          <div className={`flex justify-between font-black ${f.vat > 0 ? 'border-t pt-1.5' : ''}`}>
+            <span>{f.vat > 0 ? t('total_ttc') : t('total_plain')}</span>
             <span className="tnum text-[var(--accent)]">{money(ttc, f.currency, lang)}</span>
           </div>
         </div>

@@ -40,7 +40,7 @@ const clearRef = () => { if (typeof window !== 'undefined') localStorage.removeI
 /** Server-side error codes raised by the SQL functions. */
 export type ApiCode =
   | 'not_found' | 'bad_password' | 'agency_not_found' | 'duplicate_email'
-  | 'weak_password' | 'no_session' | 'forbidden' | 'account_blocked' | 'network';
+  | 'weak_password' | 'no_session' | 'forbidden' | 'account_blocked' | 'account_readonly' | 'network';
 
 export class ApiError extends Error {
   constructor(public code: ApiCode, message?: string) {
@@ -50,7 +50,7 @@ export class ApiError extends Error {
 
 const CODES: ApiCode[] = [
   'not_found', 'bad_password', 'agency_not_found', 'duplicate_email',
-  'weak_password', 'no_session', 'forbidden', 'account_blocked',
+  'weak_password', 'no_session', 'forbidden', 'account_blocked', 'account_readonly',
 ];
 
 /**

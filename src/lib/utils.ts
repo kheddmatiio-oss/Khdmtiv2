@@ -15,7 +15,13 @@ export const matches = (q: string, ...fields: (string | undefined)[]) => {
   return fields.some((f) => (f ?? '').toLowerCase().includes(s));
 };
 
-/** Suspended, or a trial/subscription whose date has passed. The server
- *  applies the same rule, so this only decides which screen to show. */
-export const isBlocked = (a?: { is_active: boolean; plan: string; plan_expires_at?: string | null } | null) =>
-  !!a && (!a.is_active || (a.plan !== 'free' && !!a.plan_expires_at && new Date(a.plan_expires_at) < new Date()));
+type Acc = { is_active: boolean; plan: string; plan_expires_at?: string | null } | null | undefined;
+
+/** Suspended by the admin: nothing opens. */
+export const isSuspended = (a?: Acc) => !!a && !a.is_active;
+
+/** Trial or subscription past its date: the workspace opens read-only —
+ *  the data stays visible, nothing can be added or changed. The server
+ *  applies the same rule. */
+export const isExpired = (a?: Acc) =>
+  !!a && a.is_active && a.plan !== 'free' && !!a.plan_expires_at && new Date(a.plan_expires_at) < new Date();

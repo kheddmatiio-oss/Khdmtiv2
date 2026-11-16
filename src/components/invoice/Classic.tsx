@@ -1,13 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import { fmtNumber, money } from '@/lib/money';
 import { fmtDate } from '@/lib/utils';
-import { amountInWords } from '@/lib/words';
 import { MUTED, FAINT, LINE, SOFT, Row, type Ctx } from './shared';
 
 /** The traditional sheet: boxed sections, banded table header. */
 export function Classic(x: Ctx) {
   const { C, ink, end, start, rtl, t, invoice, paid, meta, seller, buyer, client, tint, object, cols,
-    lines, L, ttc, payMode, gross, ht, vat } = x;
+    lines, L, ttc, payMode, gross, ht, vat, totalLabel } = x;
   return (
     <>
             {/* a slim band of the brand colour instead of an ink-heavy masthead */}
@@ -28,7 +27,8 @@ export function Classic(x: Ctx) {
                   <div className="min-w-0">
                     <p className="text-[1.3rem] font-black leading-tight">{C.name || '—'}</p>
                     {C.address && <p className="mt-0.5 whitespace-pre-wrap text-[0.7rem] leading-snug" style={{ color: MUTED }}>{C.address}</p>}
-                    <p className="tnum text-[0.7rem]" style={{ color: MUTED }}>{[C.phone, C.email].filter(Boolean).join('  ·  ')}</p>
+                    {C.phone && <p className="tnum text-[0.7rem]" dir="ltr" style={{ color: MUTED, textAlign: start }}>{C.phone}</p>}
+                    {C.email && <p className="text-[0.7rem]" dir="ltr" style={{ color: MUTED, textAlign: start }}>{C.email}</p>}
                   </div>
                 </div>
 
@@ -120,14 +120,9 @@ export function Classic(x: Ctx) {
               {/* amount in words · totals */}
               <div className="inv-keep mt-5 grid grid-cols-[1fr_17rem] items-start gap-5">
                 <div className="flex flex-col gap-3">
-                  <div className="rounded-xl px-4 py-3" style={{ background: SOFT, border: `1px dashed ${LINE}` }}>
-                    <p className="text-[0.62rem] font-bold" style={{ color: MUTED }}>{t('amount_words')} :</p>
-                    <p className="mt-1 text-[0.84rem] font-extrabold leading-snug">{amountInWords(ttc, invoice.currency, L)}</p>
-                  </div>
-                  {(payMode || C.rip) && (
+                  {payMode && (
                     <div className="tnum grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[0.72rem]">
-                      {payMode && <><span className="font-bold" style={{ color: FAINT }}>{t('payment_mode')}</span><span className="font-bold">{payMode}</span></>}
-                      {C.rip && <><span className="font-bold" style={{ color: FAINT }}>RIP</span><span className="font-bold">{C.rip}</span></>}
+                      <span className="font-bold" style={{ color: FAINT }}>{t('payment_mode')}</span><span className="font-bold">{payMode}</span>
                     </div>
                   )}
                 </div>
@@ -140,11 +135,11 @@ export function Classic(x: Ctx) {
                         <Row label={t('discount')} value={`− ${fmtNumber(invoice.discount)}`} />
                       </>
                     )}
-                    <Row label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} strong />
-                    <Row label={`${t('vat')}${invoice.vat > 0 ? ` (${invoice.vat}%)` : ''}`} value={money(vat, invoice.currency, L)} />
+                    {(invoice.vat > 0 || invoice.discount > 0) && <Row label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} strong />}
+                    {invoice.vat > 0 && <Row label={`${t('vat')} (${invoice.vat}%)`} value={money(vat, invoice.currency, L)} />}
                   </div>
                   <div className="flex items-center justify-between gap-3 px-4 py-3 text-white" style={{ background: ink }}>
-                    <span className="text-[0.7rem] font-extrabold" style={{ letterSpacing: rtl ? 0 : '0.08em' }}>{t('total_ttc')}</span>
+                    <span className="text-[0.7rem] font-extrabold" style={{ letterSpacing: rtl ? 0 : '0.08em' }}>{totalLabel}</span>
                     <span className="tnum text-[1.1rem] font-black">{money(ttc, invoice.currency, L)}</span>
                   </div>
                 </div>

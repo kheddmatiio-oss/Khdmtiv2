@@ -4,14 +4,13 @@ import { useApp } from '@/lib/store';
 import { Button, Card, Chip, Empty } from '@/components/ui/primitives';
 import { GettingStarted } from '@/components/GettingStarted';
 import { RevenueChart } from '@/components/RevenueChart';
-import { buildInsights, ago, type Activity } from '@/lib/insights';
-import { totals } from '@/lib/invoice';
-import { money, showMap, type CurrencyMap } from '@/lib/money';
+import { buildInsights } from '@/lib/insights';
+import { money, showMap } from '@/lib/money';
 import { fmtDate, today } from '@/lib/utils';
 import { STAGE_LABEL, STAGE_TONE, stageOf, dueState, byUrgency } from '@/lib/pipeline';
 import type { TabId } from '@/components/Shell';
 import {
-  Plus, TrendingUp, CircleCheck, Clock, TriangleAlert, Film, Receipt,
+  Plus, TrendingUp, CircleCheck, Clock, TriangleAlert, Film,
   CheckSquare, ChevronLeft, CalendarClock,
 } from 'lucide-react';
 
@@ -63,7 +62,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
         <div className="min-w-0">
           <h1 className="truncate text-xl font-black tracking-tight sm:text-2xl">{t('dashboard')}</h1>
           <p className="truncate text-xs text-muted">
-            {worker?.name ?? agency?.name} · {t('this_month')} {showMap(s.month, lang, dash)}
+            {worker?.name ?? agency?.name}
           </p>
         </div>
         <Button variant="primary" size="lg" onClick={() => setTab('videos')} className="shrink-0">
@@ -122,7 +121,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
         <Panel title={t('videos')} icon={<Film size={14} />} onMore={() => setTab('videos')} className="lg:col-span-2">
           {s.recentVideos.length === 0 ? <Empty compact icon={<Film size={16} />} title={t('no_videos')} /> : (
             <Table
-              head={[t('video_title'), t('clients'), t('date'), t('amount')]}
+              head={[t('video_title'), t('clients'), t('date'), t('deadline'), t('amount')]}
               rows={s.recentVideos.map((v) => ({
                 key: v.id,
                 accent: v.paid ? 'var(--accent)' : 'var(--text-faint)',
@@ -132,6 +131,8 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
                     {data.clients.find((c) => c.id === v.clientId)?.name ?? '—'}
                   </span>,
                   <span key="d" className="tnum whitespace-nowrap text-muted">{fmtDate(v.date)}</span>,
+                  <span key="dl" className="tnum whitespace-nowrap font-semibold"
+                    style={{ color: dueState(v)?.late ? 'var(--danger)' : 'var(--text-muted)' }}>{v.due ? fmtDate(v.due) : '—'}</span>,
                   <span key="a" className="flex items-center justify-end gap-2 whitespace-nowrap">
                     <Chip tone={v.paid ? 'accent' : 'neutral'}>{v.paid ? t('paid') : t('unpaid')}</Chip>
                     <b className="tnum">{money(v.price, v.currency ?? base, lang)}</b>
@@ -143,7 +144,7 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
         </Panel>
 
         {/* tasks that cannot wait */}
-        <Panel title={t('open_tasks')} icon={<CheckSquare size={14} />} onMore={() => setTab('tasks')}
+        <Panel title={t('open_tasks')} icon={<CheckSquare size={14} />} onMore={() => setTab('tasks')} className="lg:col-span-2"
           badge={s.attention.length || undefined}>
           {s.attention.length === 0 ? <Empty compact icon={<CheckSquare size={16} />} title={t('no_tasks')} /> : (
             <ul>
@@ -164,37 +165,6 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
                   </li>
                 );
               })}
-            </ul>
-          )}
-        </Panel>
-
-        {/* money still owed */}
-        <Panel title={t('awaiting')} icon={<Receipt size={14} />} onMore={() => setTab('invoices')}
-          badge={s.unpaidInvoices.length || undefined}>
-          {s.unpaidInvoices.length === 0 ? <Empty compact icon={<Receipt size={16} />} title={t('no_invoices')} /> : (
-            <ul>
-              {s.unpaidInvoices.map((i) => {
-                const late = !!i.due && i.due < today();
-                return (
-                  <li key={i.id} className="row flex items-center gap-3 border-b px-4 py-2.5 last:border-0">
-                    <span className="tnum shrink-0 text-xs font-extrabold">{i.number}</span>
-                    <span className="min-w-0 flex-1 truncate text-[0.72rem] text-muted">
-                      {data.clients.find((c) => c.id === i.clientId)?.name ?? '—'}
-                    </span>
-                    {late && <Chip tone="danger">{t('overdue')}</Chip>}
-                    <b className="tnum shrink-0 text-xs">{money(totals(i).ttc, i.currency, lang)}</b>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </Panel>
-
-        {/* what happened lately */}
-        <Panel title={t('this_month')} icon={<Clock size={14} />} className="lg:col-span-2">
-          {s.activity.length === 0 ? <Empty compact icon={<Clock size={16} />} title="—" /> : (
-            <ul className="grid sm:grid-cols-2">
-              {s.activity.map((a) => <ActivityRow key={a.id} a={a} />)}
             </ul>
           )}
         </Panel>
@@ -267,7 +237,7 @@ function Table({ head, rows }: {
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[34rem] border-collapse text-sm">
+      <table className="w-full min-w-[40rem] border-collapse text-sm">
         <thead>
           <tr className="border-b">
             {head.map((h, i) => (
@@ -293,19 +263,5 @@ function Table({ head, rows }: {
         </tbody>
       </table>
     </div>
-  );
-}
-
-function ActivityRow({ a }: { a: Activity }) {
-  const Icon = a.kind === 'invoice' ? Receipt : a.kind === 'task' ? CheckSquare : Film;
-  return (
-    <li className="row flex items-center gap-3 border-b px-4 py-2.5 last:border-0 sm:[&:nth-last-child(2)]:border-0">
-      <span className="grid size-7 shrink-0 place-items-center rounded-lg"
-        style={{ background: 'var(--surface-2)', color: 'var(--text-muted)' }}>
-        <Icon size={12} />
-      </span>
-      <span className="min-w-0 flex-1 truncate text-[0.78rem] font-semibold">{a.title}</span>
-      <span className="tnum shrink-0 text-[0.66rem] text-faint">{ago(a.at)}</span>
-    </li>
   );
 }

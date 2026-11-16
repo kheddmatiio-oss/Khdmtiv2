@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { fmtNumber, money } from '@/lib/money';
 import { fmtDate } from '@/lib/utils';
-import { amountInWords } from '@/lib/words';
 import { MUTED, FAINT, SOFT, type Ctx } from './shared';
 
 /** The total is the hero: one big colour block states who, what and how much
  *  before the detail begins. Rounded, borderless, generous. */
 export function Bold(x: Ctx) {
   const { C, ink, onInk, end, start, rtl, t, invoice, paid, seller, buyer, client, object, cols,
-    lines, L, ttc, payMode, gross, ht, vat } = x;
+    lines, L, ttc, payMode, gross, ht, vat, totalLabel } = x;
   const dim = onInk === '#fff' ? 'rgba(255,255,255,.66)' : 'rgba(11,17,26,.62)';
   const glass = onInk === '#fff' ? 'rgba(255,255,255,.13)' : 'rgba(11,17,26,.09)';
   const caps = { letterSpacing: rtl ? 0 : '0.14em' } as const;
@@ -28,7 +27,8 @@ export function Bold(x: Ctx) {
             )}
           <div className="min-w-0">
             <p className="text-[1.05rem] font-extrabold leading-tight">{C.name || '—'}</p>
-            <p className="tnum text-[0.66rem]" style={{ color: MUTED }}>{[C.phone, C.email].filter(Boolean).join('  ·  ')}</p>
+            {C.phone && <p className="tnum text-[0.66rem]" dir="ltr" style={{ color: MUTED, textAlign: start }}>{C.phone}</p>}
+            {C.email && <p className="text-[0.66rem]" dir="ltr" style={{ color: MUTED, textAlign: start }}>{C.email}</p>}
           </div>
         </div>
         {C.address && <p className="max-w-[15rem] whitespace-pre-wrap text-[0.66rem] leading-snug" style={{ color: MUTED, textAlign: end }}>{C.address}</p>}
@@ -51,7 +51,7 @@ export function Bold(x: Ctx) {
             <p className="tnum mt-1.5 text-[2.3rem] font-extrabold leading-none" style={{ letterSpacing: '-0.03em' }}>{invoice.number}</p>
           </div>
           <div style={{ textAlign: end }}>
-            <p className="text-[0.62rem] font-extrabold uppercase" style={{ color: dim, ...caps }}>{t('total_ttc')}</p>
+            <p className="text-[0.62rem] font-extrabold uppercase" style={{ color: dim, ...caps }}>{totalLabel}</p>
             <p className="tnum mt-1.5 text-[2.3rem] font-extrabold leading-none" style={{ letterSpacing: '-0.03em' }}>{money(ttc, invoice.currency, L)}</p>
           </div>
         </div>
@@ -120,23 +120,20 @@ export function Bold(x: Ctx) {
         <tfoot><tr className="inv-gap"><td colSpan={5} /></tr></tfoot>
       </table>
 
-      {/* words · totals */}
-      <div className="inv-keep mt-3 grid grid-cols-[1fr_16.5rem] items-stretch gap-3">
-        <div className="flex flex-col justify-center px-5 py-4" style={{ borderRadius: 20, background: `color-mix(in oklab, ${ink} 7%, #fff)` }}>
-          <p className="text-[0.62rem] font-semibold" style={{ color: MUTED }}>{t('amount_words')} :</p>
-          <p className="mt-1 text-[0.9rem] font-extrabold leading-snug">{amountInWords(ttc, invoice.currency, L)}</p>
-        </div>
-        <div className="tnum px-5 py-3.5" style={{ borderRadius: 20, background: SOFT }}>
+      {/* totals */}
+      <div className="inv-keep mt-3 flex" style={{ justifyContent: 'flex-end' }}>
+        <div className="tnum px-5 py-3.5" style={{ borderRadius: 20, background: SOFT, width: '16.5rem' }}>
           {invoice.discount > 0 && (
             <>
               <Line label={t('gross_total')} value={fmtNumber(gross)} />
               <Line label={t('discount')} value={`− ${fmtNumber(invoice.discount)}`} />
             </>
           )}
-          <Line label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} />
-          <Line label={`${t('vat')}${invoice.vat > 0 ? ` (${invoice.vat}%)` : ''}`} value={money(vat, invoice.currency, L)} />
-          <div className="mt-1.5 flex items-center justify-between gap-3 pt-2 text-[0.92rem] font-extrabold" style={{ borderTop: '1px solid #dfe4ee' }}>
-            <span className="text-[0.62rem] uppercase" style={caps}>{t('total_ttc')}</span>
+          {(invoice.vat > 0 || invoice.discount > 0) && <Line label={t('subtotal_ht')} value={money(ht, invoice.currency, L)} />}
+          {invoice.vat > 0 && <Line label={`${t('vat')} (${invoice.vat}%)`} value={money(vat, invoice.currency, L)} />}
+          <div className="flex items-center justify-between gap-3 text-[0.92rem] font-extrabold"
+            style={invoice.vat > 0 || invoice.discount > 0 ? { borderTop: '1px solid #dfe4ee', marginTop: 6, paddingTop: 8 } : undefined}>
+            <span className="text-[0.62rem] uppercase" style={caps}>{totalLabel}</span>
             <span>{money(ttc, invoice.currency, L)}</span>
           </div>
         </div>

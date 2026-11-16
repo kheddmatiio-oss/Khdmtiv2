@@ -1,14 +1,22 @@
 -- ═══════════════════════════════════════════════════════════════
---  Khedmti — تسكير السيرفر للحسابات المنتهية
+--  Khedmti — حماية السيرفر للحسابات المنتهية والموقوفة
 --  SQL Editor → الصق كامل → Run
 -- ═══════════════════════════════════════════════════════════════
---  قبل: التوقيف كان في الواجهة برك.
---  دروك: قاعدة البيانات هي زادة ترفض القراءة والحفظ لحساب
---  موقوف ولا انتهت تجربتو/اشتراكو. الشات تاع الدعم يبقى يخدم.
+--  حساب موقوف من الأدمين  → لا قراءة لا حفظ.
+--  تجربة/اشتراك انتهى      → يقرا بياناتو برك، وما يقدر يزيد
+--                            ولا يبدّل حتى حاجة حتى يجدّد.
+--  الشات تاع الدعم يبقى يخدم في الحالتين.
 -- ═══════════════════════════════════════════════════════════════
 
--- نفس القاعدة اللي في الواجهة: موقوف، ولا خطة غير free وفات تاريخها
+-- مفتوح للقراءة: أي حساب ماهوش موقوف
 create or replace function account_open(p_agency uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select coalesce(a.is_super, false) or coalesce(a.is_active, true)
+    from agencies a where a.id = p_agency;
+$$;
+
+-- مفتوح للكتابة: ماهوش موقوف، وخطتو مازال ما فاتش تاريخها
+create or replace function account_writable(p_agency uuid)
 returns boolean language sql stable security definer set search_path = public as $$
   select coalesce(a.is_super, false)
       or (coalesce(a.is_active, true)
@@ -36,6 +44,7 @@ begin
   ag := session_agency(p_token);
   if ag is null then raise exception 'no_session'; end if;
   if not account_open(ag) then raise exception 'account_blocked'; end if;
+  if not account_writable(ag) then raise exception 'account_readonly'; end if;
   insert into app_data (agency_id, data, updated_at) values (ag, p_data, now())
   on conflict (agency_id) do update set data = excluded.data, updated_at = now();
 end $$;

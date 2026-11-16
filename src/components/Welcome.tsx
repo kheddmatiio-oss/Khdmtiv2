@@ -6,7 +6,7 @@ import { LandingSections } from './LandingSections';
 import { priceLabel } from '@/lib/pricing';
 import { STAGE_LABEL } from '@/lib/pipeline';
 import {
-  ArrowRight, Gift, Languages, Sun, Moon, CalendarClock, Check, MapPin, TrendingUp,
+  ArrowRight, Gift, Languages, Sun, Moon, CalendarClock, Check, TrendingUp,
 } from 'lucide-react';
 
 export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn: () => void }) {
@@ -39,6 +39,7 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
           <nav className="ms-8 hidden items-center gap-7 text-[0.82rem] font-semibold text-white/60 md:flex">
             <a href="#features" className="transition-colors hover:text-white">{t('lp_nav_features')}</a>
             <a href="#pricing" className="transition-colors hover:text-white">{t('lp_nav_price')}</a>
+            <a href="#faq" className="transition-colors hover:text-white">{t('faq_k')}</a>
           </nav>
           <div className="ms-auto flex items-center gap-1">
             <button onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label="language"
@@ -70,7 +71,7 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
               style={invited
                 ? { borderColor: 'rgba(13,124,251,.55)', background: 'rgba(13,124,251,.16)', color: '#9CCBFF' }
                 : { borderColor: 'rgba(255,255,255,.12)', background: 'rgba(255,255,255,.04)', color: 'rgba(255,255,255,.7)' }}>
-              {invited ? <Gift size={13} /> : <MapPin size={13} />}
+              {invited && <Gift size={13} />}
               {invited ? t('lp_invited') : t('lp_made')}
             </span>
 

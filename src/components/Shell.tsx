@@ -5,11 +5,12 @@ import { cn } from '@/lib/cn';
 import { Logo } from './Logo';
 import { Button } from './ui/primitives';
 import { SupportChat } from './SupportChat';
-import { priceLabel } from '@/lib/pricing';
+import { priceLabel, wasLabel } from '@/lib/pricing';
+import { upgradeLink, upgradeChannel } from '@/lib/support';
 import type { Key } from '@/lib/i18n';
 import {
   LayoutGrid, Film, CheckSquare, Receipt, Briefcase, Users, Settings as Cog,
-  MoreHorizontal, LogOut, Sun, Moon, Languages, X, Menu, Hourglass,
+  MoreHorizontal, LogOut, Sun, Moon, Languages, X, Menu, Hourglass, Lock, RefreshCw,
 } from 'lucide-react';
 
 export type TabId = 'dashboard' | 'videos' | 'tasks' | 'invoices' | 'clients' | 'team' | 'settings';
@@ -31,7 +32,7 @@ const LABEL: Record<TabId, Key> = {
 export function Shell({ tab, setTab, children }: {
   tab: TabId; setTab: (t: TabId) => void; children: ReactNode;
 }) {
-  const { t, lang, setLang, dark, toggleTheme, agency, worker, signOut, saving } = useApp();
+  const { t, lang, setLang, dark, toggleTheme, agency, worker, signOut, saving, readOnly } = useApp();
   const [more, setMore] = useState(false);
   const solo = agency?.account_type === 'solo';
   const visible = (id: TabId) => !(solo && id === 'team') && !(worker && (id === 'team' || id === 'settings' || id === 'clients'));
@@ -85,7 +86,7 @@ export function Shell({ tab, setTab, children }: {
               <Hourglass size={13} />{t('trial_plan')}
             </p>
             <p className="mt-1 text-xs font-bold">{trialLabel}</p>
-            <p className="tnum mt-0.5 text-[0.64rem] text-muted">{t('then_price', priceLabel(lang))}</p>
+            <p className="tnum mt-0.5 text-[0.64rem] text-muted">{t('then_price', priceLabel(lang, agency?.account_type))}</p>
             <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--surface)]">
               <div className="h-full rounded-full" style={{ background: 'var(--accent)', width: `${Math.min(100, (trialDays / 14) * 100)}%` }} />
             </div>
@@ -127,6 +128,7 @@ export function Shell({ tab, setTab, children }: {
         </header>
 
         <main className={cn('mx-auto w-full flex-1 px-4 py-5 pb-28 md:px-6 md:py-7 md:pb-10', tab === 'videos' ? 'max-w-[92rem]' : 'max-w-5xl')}>
+          {readOnly && <ReadOnlyBar />}
           {children}
         </main>
         <SupportChat />
@@ -200,6 +202,49 @@ export function Shell({ tab, setTab, children }: {
         )}
       </nav>
 
+    </div>
+  );
+}
+
+/** Trial or subscription ended: everything is still there to read, and this
+ *  bar says how to get editing back. */
+function ReadOnlyBar() {
+  const { t, lang, agency, worker, refreshAgency, toast } = useApp();
+  const [busy, setBusy] = useState(false);
+  const trial = agency?.plan === 'trial';
+  const href = upgradeLink(`${t('subscribe')} — ${agency?.email ?? ''}`);
+  const recheck = async () => {
+    setBusy(true);
+    const a = await refreshAgency();
+    setBusy(false);
+    if (!a || (a.plan_expires_at && new Date(a.plan_expires_at) < new Date())) toast(t('still_blocked'), 'err');
+  };
+  return (
+    <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border p-4"
+      style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent-border)' }}>
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--accent)]"><Lock size={17} /></span>
+      <div className="min-w-0 flex-1 basis-56">
+        <p className="text-sm font-extrabold">{trial ? t('trial_over') : t('sub_over')}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted">{t('readonly_sub')}</p>
+        {!worker && (
+          <p className="tnum mt-1.5 text-xs font-extrabold text-[var(--accent)]">
+            <s className="font-bold text-faint">{wasLabel(lang, agency?.account_type)}</s>{' '}
+            {t('price_month', priceLabel(lang, agency?.account_type))}
+          </p>
+        )}
+      </div>
+      {!worker && (
+        <div className="flex flex-wrap gap-2">
+          {href && (
+            <a href={href} target="_blank" rel="noreferrer"
+              className="flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-white"
+              style={{ background: 'var(--accent)' }}>
+              {t(upgradeChannel === 'instagram' ? 'upgrade_ig' : 'subscribe')}
+            </a>
+          )}
+          <Button className="min-h-11" loading={busy} onClick={recheck}><RefreshCw size={14} />{t('ive_paid')}</Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { isBlocked } from './utils';
+import { isSuspended, isExpired } from './utils';
 import { api, ApiError, getToken, captureRef } from './api';
 import { EMPTY_DATA } from './defaults';
 import { translate, DIR, type Key, type Lang } from './i18n';
@@ -26,6 +26,8 @@ type Store = {
   /** True once a blocked account is open again and its data is loaded. */
   unlock: () => Promise<boolean>;
   saving: boolean;
+  /** Trial/subscription ended: data is visible, edits are refused. */
+  readOnly: boolean;
   toasts: Toast[]; toast: (msg: string, tone?: 'ok' | 'err') => void;
 };
 
@@ -76,9 +78,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // the cached session is only a hint — the token decides
     (async () => {
       const fresh = (await refreshAgency()) ?? cached;
-      // an expired account has nothing to load: the server refuses, and the
+      // a suspended account has nothing to load: the server refuses, and the
       // blocked screen is what the user needs to see — not the login page
-      if (isBlocked(fresh)) { setPhase('ready'); return; }
+      if (isSuspended(fresh)) { setPhase('ready'); return; }
       try {
         setData(await api.load()); setPhase('ready');
       } catch (e) {
@@ -122,13 +124,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await api.save(next);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'network';
-      toast(translate(lang, code === 'no_session' ? 'err_session' : 'err_net'), 'err');
+      const locked = code === 'account_readonly' || code === 'account_blocked';
+      toast(translate(lang, locked ? 'readonly_toast' : code === 'no_session' ? 'err_session' : 'err_net'), 'err');
     } finally {
       setSaving(false);
     }
   }, [lang, toast]);
 
+  /* An expired account is read-only: the edit is refused here, before the
+     screen changes, so nothing appears saved that the server would reject. */
+  const readOnly = isExpired(agency);
   const mutate = useCallback((next: AppData | ((d: AppData) => AppData)) => {
+    if (readOnly) { toast(translate(lang, 'readonly_toast'), 'err'); return; }
     setData((prev) => {
       const v = typeof next === 'function' ? (next as (d: AppData) => AppData)(prev) : next;
       pending.current = v;
@@ -136,7 +143,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timer.current = setTimeout(flush, 400);
       return v;
     });
-  }, [flush]);
+  }, [flush, readOnly, lang, toast]);
 
   /* never lose an in-flight edit on navigate away */
   useEffect(() => {
@@ -150,7 +157,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAgency(a); setWorker(w ?? null);
     localStorage.setItem(LS.session, JSON.stringify({ agency: a, worker: w ?? null }));
     if (d) { setData(d); setPhase('ready'); return; }
-    if (isBlocked(a)) { setPhase('ready'); return; }   // nothing to load; the blocked screen takes over
+    if (isSuspended(a)) { setPhase('ready'); return; }   // nothing to load; the blocked screen takes over
     api.load().then((d2) => { setData(d2); setPhase('ready'); })
       .catch((e) => {
         if (e instanceof ApiError && e.code === 'account_blocked') { setPhase('ready'); return; }
@@ -186,7 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const unlock = useCallback(async () => {
     try {
       const a = await api.me();
-      if (isBlocked(a)) return false;
+      if (isSuspended(a) || isExpired(a)) return false;
       const d = await api.load();
       setData(d); setAgency(a);
       const raw = localStorage.getItem(LS.session);
@@ -197,8 +204,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     lang, setLang, t, dark, toggleTheme, phase,
-    agency, worker, data, mutate, signIn, signOut, reload, refreshAgency, unlock, saving, toasts, toast,
-  }), [refreshAgency, unlock, lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
+    agency, worker, data, mutate, signIn, signOut, reload, refreshAgency, unlock, saving, readOnly, toasts, toast,
+  }), [readOnly, refreshAgency, unlock, lang, setLang, t, dark, toggleTheme, phase, agency, worker, data, mutate, signIn, signOut, reload, saving, toasts, toast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

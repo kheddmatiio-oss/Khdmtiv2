@@ -22,18 +22,18 @@ const arabic = IBM_Plex_Sans_Arabic({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://khedmti.app'),
-  title: { default: 'Khedmti — خدمتي | Work tracking & invoicing for video editors', template: '%s · Khedmti' },
-  description: 'خدمتي: تتبّع فيديوهاتك من الطلب حتى التسليم وفوتر بالصيغة الجزائرية. Track every video from brief to delivery and invoice in the Algerian format. 14 days free.',
+  title: { default: 'Khedmti — خدمتي | Work tracking & invoicing for freelancers', template: '%s · Khedmti' },
+  description: 'خدمتي: تتبّع خدمتك من الطلب حتى التسليم وابعث فواتيرك بضغطة. Track every project from brief to delivery and invoice it in one tap. For freelancers and teams. 14 days free.',
   applicationName: 'Khedmti',
-  keywords: ['Khedmti', 'خدمتي', 'facture Algérie', 'فاتورة', 'video editor', 'freelance Algérie', 'invoicing', 'مونتاج'],
+  keywords: ['Khedmti', 'خدمتي', 'freelancer', 'freelance', 'facture', 'فاتورة', 'invoicing', 'video editor', 'مونتاج', 'فريلانسر'],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website', url: 'https://khedmti.app', siteName: 'Khedmti — خدمتي',
     title: 'Khedmti — خدمتي',
-    description: 'Track every video from brief to delivery, then invoice it in the Algerian format. 14 days free.',
+    description: 'Track every project from brief to delivery, then invoice it in one tap. 14 days free.',
     images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Khedmti' }],
   },
-  twitter: { card: 'summary', title: 'Khedmti — خدمتي', description: 'Work tracking and invoicing for video editors.', images: ['/icon-512.png'] },
+  twitter: { card: 'summary', title: 'Khedmti — خدمتي', description: 'Work tracking and invoicing for freelancers.', images: ['/icon-512.png'] },
   manifest: '/manifest.webmanifest',
 };
 
