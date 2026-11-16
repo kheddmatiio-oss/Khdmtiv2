@@ -169,9 +169,4 @@ html { scroll-behavior: smooth; }
 @keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
 @keyframes aurora { 0%,100% { transform: translate3d(0,0,0) scale(1) } 50% { transform: translate3d(4%,-3%,0) scale(1.08) } }
 @keyframes sheen { from { background-position: 0% 50% } to { background-position: 200% 50% } }
-.grad-text {
-  background: linear-gradient(90deg, #7CC0FF, #0D7CFB 40%, #9AD0FF 70%, #7CC0FF);
-  background-size: 200% 100%;
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: sheen 7s linear infinite;
-}
+.grad-text { color: #4C9DFF; }

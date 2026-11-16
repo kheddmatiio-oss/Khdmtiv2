@@ -6,7 +6,7 @@ import { LandingSections } from './LandingSections';
 import { priceLabel } from '@/lib/pricing';
 import { STAGE_LABEL } from '@/lib/pipeline';
 import {
-  ArrowRight, Gift, Languages, Sun, Moon, CalendarClock, Check, TrendingUp,
+  ArrowRight, Gift, Languages, Sun, Moon, Check,
 } from 'lucide-react';
 
 export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn: () => void }) {
@@ -114,65 +114,80 @@ export function Welcome({ onSignUp, onSignIn }: { onSignUp: () => void; onSignIn
   );
 }
 
-/** Slow-moving light behind the hero: depth without a stock photo. */
+/** One still wash of light behind the hero. No motion, no grid. */
 function Aurora() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute -top-[20%] end-[-10%] size-[52rem] rounded-full opacity-70"
-        style={{ background: 'radial-gradient(circle, rgba(13,124,251,.42), transparent 60%)', animation: 'aurora 16s ease-in-out infinite' }} />
-      <div className="absolute bottom-[-30%] start-[-12%] size-[44rem] rounded-full opacity-70"
-        style={{ background: 'radial-gradient(circle, rgba(22,82,162,.5), transparent 62%)', animation: 'aurora 22s ease-in-out infinite reverse' }} />
-      <div className="absolute start-[38%] top-[30%] size-[26rem] rounded-full opacity-40"
-        style={{ background: 'radial-gradient(circle, rgba(124,192,255,.25), transparent 65%)', animation: 'aurora 19s ease-in-out infinite' }} />
-      <div className="absolute inset-0 opacity-[.07]"
-        style={{
-          backgroundImage: 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
-          backgroundSize: '56px 56px',
-          maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%)',
-        }} />
+      <div className="absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse 60% 55% at 78% 8%, rgba(13,124,251,.2), transparent 70%)' }} />
       <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: 'linear-gradient(to top, #05080F, transparent)' }} />
     </div>
   );
 }
 
-const BOARD: { stage: 'editing' | 'review' | 'delivered'; cards: { title: string; price: string; fill: number }[] }[] = [
-  { stage: 'editing', cards: [{ title: 'Reel — Promo', price: '3,000', fill: 2 }, { title: 'Vlog YouTube', price: '8,000', fill: 2 }] },
-  { stage: 'review', cards: [{ title: 'Ad 30s', price: '12,000', fill: 3 }] },
-  { stage: 'delivered', cards: [{ title: 'Showreel 2026', price: '15,000', fill: 5 }, { title: 'Reel — Launch', price: '3,000', fill: 5 }] },
+type Stage = 'brief' | 'editing' | 'review' | 'delivered';
+type Demo = { title: string; client: string; price: string; due?: 'today' | 'due_tomorrow'; rev?: number; paid?: boolean };
+const BOARD: { stage: Stage; cards: Demo[] }[] = [
+  { stage: 'brief', cards: [{ title: 'Podcast — Ep. 12', client: 'Atlas Media', price: '6,000' }, { title: 'Reel — Menu', client: 'Café Lina', price: '3,000' }] },
+  { stage: 'editing', cards: [{ title: 'Reel — Promo', client: 'Studio Nord', price: '3,000', due: 'due_tomorrow' }, { title: 'Vlog YouTube', client: 'K. Benali', price: '8,000' }, { title: 'Teaser 15s', client: 'Atlas Media', price: '4,500' }] },
+  { stage: 'review', cards: [{ title: 'Ad 30s', client: 'Studio Nord', price: '12,000', due: 'today', rev: 2 }] },
+  { stage: 'delivered', cards: [{ title: 'Showreel 2026', client: 'K. Benali', price: '15,000', paid: true }, { title: 'Reel — Launch', client: 'Café Lina', price: '3,000', paid: true }] },
 ];
+const NAV = ['dashboard', 'videos', 'tasks', 'invoices', 'clients'] as const;
 
-/** The product, staged: a tilted board with an invoice and two notes floating
- *  over it. Illustrative content only. */
+/** The product as it is: the videos board, straight on and at reading size,
+ *  running off the edge of the page. Illustrative content only. */
 function HeroScene() {
-  const { t, lang } = useApp();
-  const rtl = lang === 'ar';
+  const { t } = useApp();
   return (
-    <div aria-hidden className="relative mx-auto w-full min-w-0 max-w-[36rem] px-3 sm:px-0 lg:max-w-none" style={{ perspective: 1800 }}>
-      <div className="relative" style={{ transform: `rotateY(${rtl ? 13 : -13}deg) rotateX(7deg) rotateZ(${rtl ? -1 : 1}deg)`, transformStyle: 'preserve-3d' }}>
-        {/* board */}
-        <div className="overflow-hidden rounded-2xl border border-white/12 shadow-[0_50px_120px_rgba(0,0,0,.7),0_0_0_1px_rgba(255,255,255,.04)]"
-          style={{ background: 'linear-gradient(180deg,#121A27,#0B111A)' }}>
-          <div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-3">
-            {[0, 1, 2].map((n) => <span key={n} className="size-2.5 rounded-full bg-white/14" />)}
-            <span dir="ltr" className="mx-auto rounded-md bg-white/[.06] px-3 py-1 text-[0.6rem] text-white/45">khedmti.app</span>
+    <div aria-hidden className="relative w-full min-w-0">
+      <div className="flex h-[26rem] overflow-hidden rounded-xl border border-white/10 text-start shadow-[0_30px_80px_rgba(0,0,0,.55)] sm:h-[30rem] lg:w-[58rem] lg:max-w-none"
+        style={{ background: '#0B111A', maskImage: 'linear-gradient(to bottom, #000 72%, transparent)' }}>
+        {/* sidebar */}
+        <div className="hidden w-44 shrink-0 flex-col gap-0.5 border-e border-white/8 p-3 sm:flex" style={{ background: '#0E141E' }}>
+          <div className="mb-3 flex items-center gap-2 px-1 py-1">
+            <Logo size={24} />
+            <span className="min-w-0">
+              <span className="block truncate text-[0.72rem] font-extrabold">Studio Nord</span>
+              <span dir="ltr" className="block truncate text-[0.56rem] text-white/40">hello@studionord.co</span>
+            </span>
           </div>
-          <div className="grid grid-cols-3 gap-2.5 p-3.5">
+          {NAV.map((id) => (
+            <span key={id} className="rounded-lg px-2.5 py-2 text-[0.72rem] font-bold"
+              style={id === 'videos' ? { background: 'rgba(13,124,251,.14)', color: '#6FB1FF' } : { color: 'rgba(255,255,255,.5)' }}>
+              {t(id)}
+            </span>
+          ))}
+        </div>
+
+        {/* videos board */}
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-base font-extrabold leading-tight">{t('videos')}</p>
+              <p className="tnum text-[0.62rem] text-white/45">8 · 54,500 DA</p>
+            </div>
+            <span className="rounded-lg px-3 py-2 text-[0.68rem] font-bold text-white" style={{ background: '#0D7CFB' }}>+ {t('new_video')}</span>
+          </div>
+
+          <div className="mt-4 grid min-w-0 flex-1 grid-cols-2 gap-2.5 lg:grid-cols-4">
             {BOARD.map((col, n) => (
-              <div key={col.stage} className="rounded-xl border border-white/8 bg-white/[.03] p-2">
-                <p className="mb-2 flex items-center gap-1.5 px-1 text-[0.64rem] font-extrabold text-white/85">
-                  <span className="size-2 rounded-full" style={{ background: `rgba(13,124,251,${0.45 + n * 0.27})` }} />
+              <div key={col.stage} className={`min-w-0 rounded-lg p-2 ${n > 1 ? 'hidden lg:block' : ''}`} style={{ background: 'rgba(255,255,255,.03)' }}>
+                <p className="mb-2 flex items-center justify-between px-1 text-[0.66rem] font-extrabold text-white/80">
                   {t(STAGE_LABEL[col.stage])}
+                  <span className="tnum font-bold text-white/35">{col.cards.length}</span>
                 </p>
                 <div className="flex flex-col gap-2">
                   {col.cards.map((c) => (
-                    <div key={c.title} className="rounded-lg border border-white/8 p-2.5" style={{ background: '#151C29', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.05)' }}>
-                      <p className="truncate text-[0.68rem] font-bold text-white/90">{c.title}</p>
-                      <div className="mt-2 flex gap-[3px]">
-                        {[0, 1, 2, 3, 4].map((k) => (
-                          <span key={k} className="h-[3px] flex-1 rounded-full" style={{ background: k < c.fill ? '#0D7CFB' : 'rgba(255,255,255,.09)' }} />
-                        ))}
+                    <div key={c.title} className="rounded-md border border-white/8 p-2.5" style={{ background: '#141B27' }}>
+                      <p className="truncate text-[0.72rem] font-bold text-white/90">{c.title}</p>
+                      <p className="truncate text-[0.6rem] text-white/45">{c.client}</p>
+                      <div className="mt-2.5 flex items-center justify-between gap-1.5">
+                        <span className="tnum text-[0.7rem] font-extrabold">{c.price} <span className="font-semibold text-white/40">DA</span></span>
+                        {c.due && <span className="rounded px-1.5 py-0.5 text-[0.54rem] font-bold" style={{ background: 'rgba(13,124,251,.16)', color: '#7DB8FF' }}>{t(c.due)}</span>}
+                        {c.paid && <span className="rounded px-1.5 py-0.5 text-[0.54rem] font-bold" style={{ background: 'rgba(13,124,251,.16)', color: '#7DB8FF' }}>{t('paid')}</span>}
+                        {!c.due && !c.paid && c.rev === undefined && <span className="rounded bg-white/[.06] px-1.5 py-0.5 text-[0.54rem] font-bold text-white/50">{t('unpaid')}</span>}
                       </div>
-                      <p className="tnum mt-2 text-[0.66rem] font-extrabold">{c.price} <span className="font-semibold text-white/40">DA</span></p>
                     </div>
                   ))}
                 </div>
@@ -180,54 +195,7 @@ function HeroScene() {
             ))}
           </div>
         </div>
-
-        {/* invoice */}
-        <div className="absolute -bottom-14 start-[-7%] w-[46%] rounded-xl bg-white p-3.5 text-[#0B111A] shadow-[0_30px_70px_rgba(0,0,0,.55)]"
-          style={{ transform: 'translateZ(70px)', animation: 'floaty 7s ease-in-out infinite' }}>
-          <div className="h-1 w-full rounded-full bg-[#0D7CFB]" />
-          <div className="mt-2.5 flex items-start justify-between" dir="ltr">
-            <div>
-              <p className="text-[0.74rem] font-extrabold tracking-wide text-[#0D7CFB]">FACTURE</p>
-              <p className="tnum text-[0.56rem] font-bold text-[#5c6478]">F-0042</p>
-            </div>
-            <span className="rounded border border-[#0D7CFB] px-1.5 py-0.5 text-[0.48rem] font-extrabold tracking-widest text-[#0D7CFB]">PAYÉE</span>
-          </div>
-          <div className="mt-2.5 space-y-1.5">
-            {[78, 62, 70].map((w, n) => (
-              <div key={n} className="flex items-center gap-2">
-                <span className="h-1.5 rounded-full bg-[#E3E7EF]" style={{ width: `${w}%` }} />
-                <span className="ms-auto h-1.5 w-7 rounded-full bg-[#CBD3E1]" />
-              </div>
-            ))}
-          </div>
-          <div className="tnum mt-3 flex items-center justify-between rounded-md bg-[#0B111A] px-2.5 py-1.5 text-white" dir="ltr">
-            <span className="text-[0.5rem] font-bold tracking-widest text-white/70">TOTAL TTC</span>
-            <span className="text-[0.74rem] font-extrabold">26,000 DA</span>
-          </div>
-        </div>
-
-        {/* deadline note */}
-        <div className="absolute -top-6 end-[-5%] flex items-center gap-2.5 rounded-2xl border border-white/14 px-3.5 py-2.5 shadow-[0_20px_50px_rgba(0,0,0,.5)] backdrop-blur-xl"
-          style={{ background: 'rgba(20,28,42,.82)', transform: 'translateZ(90px)', animation: 'floaty 6s ease-in-out infinite .8s' }}>
-          <span className="grid size-8 place-items-center rounded-xl bg-[rgba(13,124,251,.22)] text-[#8CC2FF]"><CalendarClock size={15} /></span>
-          <span>
-            <span className="block text-[0.68rem] font-extrabold">{t('lp_mock_due')}</span>
-            <span className="block text-[0.58rem] text-white/50">Reel — Promo</span>
-          </span>
-        </div>
-
-        {/* revenue note */}
-        <div className="absolute bottom-[-4.5rem] end-[2%] w-[34%] rounded-2xl border border-white/14 p-3 shadow-[0_20px_50px_rgba(0,0,0,.5)] backdrop-blur-xl"
-          style={{ background: 'rgba(20,28,42,.82)', transform: 'translateZ(50px)', animation: 'floaty 8s ease-in-out infinite .3s' }}>
-          <p className="flex items-center gap-1.5 text-[0.6rem] font-extrabold text-white/75"><TrendingUp size={12} className="text-[#8CC2FF]" />{t('lp_mock_rev')}</p>
-          <div className="mt-2.5 flex h-12 items-end gap-1.5">
-            {[32, 48, 40, 64, 56, 88].map((h, n) => (
-              <span key={n} className="flex-1 rounded-t-[3px]" style={{ height: `${h}%`, background: n === 5 ? '#0D7CFB' : 'rgba(13,124,251,.35)' }} />
-            ))}
-          </div>
-        </div>
       </div>
-      <div className="h-24" />
     </div>
   );
 }
