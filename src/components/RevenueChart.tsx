@@ -4,7 +4,7 @@ import { useApp } from '@/lib/store';
 import { Card } from '@/components/ui/primitives';
 import { money, fmtNumber, symbol } from '@/lib/money';
 import type { Currency, Video } from '@/lib/types';
-import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const MONTHS = 6;
 const PLOT_H = 148;
@@ -72,8 +72,7 @@ export function RevenueChart({ videos, base }: { videos: Video[]; base: Currency
     <Card className="overflow-hidden p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-xs font-extrabold">
-            <span className="text-[var(--accent)]"><TrendingUp size={14} /></span>
+          <h2 className="text-[0.8rem] font-extrabold">
             {t('revenue_6m')}
           </h2>
           <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">

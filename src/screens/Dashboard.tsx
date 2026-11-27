@@ -10,7 +10,7 @@ import { fmtDate, today } from '@/lib/utils';
 import { STAGE_LABEL, STAGE_TONE, stageOf, dueState, byUrgency } from '@/lib/pipeline';
 import type { TabId } from '@/components/Shell';
 import {
-  Plus, TrendingUp, CircleCheck, Clock, TriangleAlert, Film,
+  Plus, Film,
   CheckSquare, ChevronLeft, CalendarClock,
 } from 'lucide-react';
 
@@ -74,11 +74,11 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
 
       {/* financial position, four plain figures */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi icon={<TrendingUp size={15} />} label={t('total')} value={showMap(s.revenue, lang, dash)} accent />
-        <Kpi icon={<CircleCheck size={15} />} label={t('paid')} value={showMap(s.collected, lang, dash)} />
-        <Kpi icon={<Clock size={15} />} label={t('outstanding')} value={showMap(s.outstanding, lang, dash)} />
+        <Kpi label={t('total')} value={showMap(s.revenue, lang, dash)} accent />
+        <Kpi tone="var(--accent)" label={t('paid')} value={showMap(s.collected, lang, dash)} />
+        <Kpi tone="var(--chart-pending)" label={t('outstanding')} value={showMap(s.outstanding, lang, dash)} />
         <Kpi
-          icon={<TriangleAlert size={15} />} label={t('overdue')}
+          label={t('overdue')}
           value={showMap(s.overdue, lang, dash)}
           sub={s.overdueCount > 0 ? `${s.overdueCount}` : undefined}
           danger={s.overdueCount > 0}
@@ -175,28 +175,25 @@ export function Dashboard({ setTab }: { setTab: (t: TabId) => void }) {
 
 /* ── pieces ──────────────────────────────────────────────── */
 
-function Kpi({ icon, label, value, sub, accent, danger, onClick }: {
-  icon: React.ReactNode; label: string; value: string; sub?: string;
-  accent?: boolean; danger?: boolean; onClick?: () => void;
+/** A figure and its name. The coloured rule says what kind of money it is:
+ *  blue collected, gray still owed, red late — no pictograms. */
+function Kpi({ label, value, sub, accent, danger, tone, onClick }: {
+  label: string; value: string; sub?: string;
+  accent?: boolean; danger?: boolean; tone?: string; onClick?: () => void;
 }) {
-  const tint = danger ? 'var(--danger)' : accent ? 'var(--accent)' : 'var(--text-muted)';
-  const bg = danger ? 'var(--danger-soft)' : accent ? 'var(--accent-soft)' : 'var(--surface-2)';
+  const rule = danger ? 'var(--danger)' : accent ? 'var(--text)' : tone ?? 'var(--border)';
   const body = (
-    <Card hover={!!onClick} className="flex items-start gap-3 p-3.5">
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl" style={{ background: bg, color: tint }}>
-        {icon}
+    <Card hover={!!onClick} className="relative h-full overflow-hidden px-4 py-3.5">
+      <span aria-hidden className="absolute inset-y-3.5 start-0 w-[3px] rounded-e-full" style={{ background: rule }} />
+      <span className="flex items-center gap-1.5">
+        <span className="truncate text-[0.7rem] font-semibold text-muted">{label}</span>
+        {sub && (
+          <span className="tnum rounded-full px-1.5 text-[0.6rem] font-extrabold"
+            style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>{sub}</span>
+        )}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5">
-          <span className="truncate text-[0.68rem] font-semibold text-muted">{label}</span>
-          {sub && (
-            <span className="tnum rounded-full px-1.5 text-[0.6rem] font-extrabold"
-              style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}>{sub}</span>
-          )}
-        </span>
-        <span className="tnum block truncate text-base font-black leading-tight sm:text-lg"
-          style={danger ? { color: 'var(--danger)' } : undefined}>{value}</span>
-      </span>
+      <span className="tnum mt-1 block truncate text-lg font-black leading-tight tracking-tight sm:text-[1.35rem]"
+        style={danger ? { color: 'var(--danger)' } : undefined}>{value}</span>
     </Card>
   );
   return onClick
@@ -204,16 +201,15 @@ function Kpi({ icon, label, value, sub, accent, danger, onClick }: {
     : body;
 }
 
-function Panel({ title, icon, badge, onMore, children, className }: {
-  title: string; icon: React.ReactNode; badge?: number;
+function Panel({ title, badge, onMore, children, className }: {
+  title: string; icon?: React.ReactNode; badge?: number;
   onMore?: () => void; children: React.ReactNode; className?: string;
 }) {
   const { t } = useApp();
   return (
     <Card className={`flex flex-col overflow-hidden ${className ?? ''}`}>
       <div className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
-        <h2 className="flex items-center gap-2 text-xs font-extrabold">
-          <span className="text-[var(--accent)]">{icon}</span>
+        <h2 className="flex items-center gap-2 text-[0.8rem] font-extrabold">
           {title}
           {badge !== undefined && (
             <span className="tnum rounded-full bg-[var(--surface-2)] px-1.5 text-[0.6rem] text-muted">{badge}</span>
